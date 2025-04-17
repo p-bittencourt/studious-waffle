@@ -1,0 +1,22 @@
+services:
+  web-app:
+    build: .
+    env_file:
+      - .env
+    ports:
+      - 8000:80
+    depends_on:
+      - db
+    volumes:
+      - ./:/usr/src/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 80 --reload
+
+  db:
+    image: postgres:17
+    container_name: studious-waffle-db
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - 5432:5432
