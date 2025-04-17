@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from fastapi import Depends
 from sqlmodel import SQLModel, create_engine, Session
 
-from user import Shopper, Vendor
+from .user import Shopper, Vendor
 
 load_dotenv()
 
@@ -32,3 +32,6 @@ def get_session():
 
 
 DbSession = Annotated[Session, Depends(get_session)]
+
+if __name__ == "__main__":
+    create_db_and_tables()

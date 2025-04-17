@@ -1,7 +1,8 @@
 """Define the user SQLModel"""
 
-from sqlmodel import Date, Field, SQLModel
+from typing import List
 from enum import StrEnum
+from sqlmodel import ARRAY, Field, SQLModel, String, Column
 
 
 class UserStatus(StrEnum):
@@ -31,9 +32,9 @@ class User(SQLModel):
     name: str
     phone_number: str
     email: str
-    created_at: Date
-    last_login: Date
-    status: UserStatus
+    created_at: str
+    last_login: str
+    status: str
 
 
 class Vendor(User, table=True):
@@ -42,7 +43,7 @@ class Vendor(User, table=True):
     rating: str
     bank_info: str
     comission: str
-    locations: list[Location]
+    locations: List[str] = Field(sa_column=Column(ARRAY(String)))
     specialty: str
 
 
@@ -54,4 +55,4 @@ class Shopper(User, table=True):
     wishlist: str
     search_history: str
     order_history: str
-    locations: list[Location]
+    locations: List[str] = Field(sa_column=Column(ARRAY(String)))
