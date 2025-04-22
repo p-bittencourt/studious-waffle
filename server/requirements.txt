@@ -27,7 +27,7 @@ mccabe==0.7.0
 mdurl==0.1.2
 pillow==11.1.0
 platformdirs==4.3.7
-psycopg2==2.9.10
+psycopg2-binary==2.9.10
 pycodestyle==2.12.1
 pydantic==2.11.3
 pydantic_core==2.33.1
