@@ -20,3 +20,9 @@ services:
       POSTGRES_DB: ${DB_NAME}
     ports:
       - 5432:5432
+    volumes:
+      - stds-wffl:/var/lib/postgresql/data
+
+volumes:
+  stds-wffl:
+    external: true
