@@ -4,7 +4,7 @@ from typing import List, Optional
 from enum import StrEnum
 from datetime import datetime
 from pydantic import EmailStr
-from sqlmodel import Field, SQLModel, Column, JSON, Relationship
+from sqlmodel import Field, SQLModel, Column, JSON
 
 ### AUXILIARY STRUCTURES ###
 
@@ -19,7 +19,7 @@ class UserStatus(StrEnum):
 class LocationBase(SQLModel):
     """Location auxiliary data structure"""
 
-    type: str  # this could be something like point of sale, warehouse for the vendor | house or office for the shopper, for instance
+    type: str  # pylint: disable=line-too-long # the type could be something like point of sale, warehouse for the vendor | house or office for the shopper, for instance
     street: str
     number: str
     complement: Optional[str] = None
@@ -31,7 +31,9 @@ class LocationBase(SQLModel):
 
 # For database storage as JSON
 class Location(LocationBase):
-    pass
+    """For db storage as JSON"""
+
+    pass  # pylint: disable=unnecessary-pass
 
 
 ### USER MODELS (not a table) ###
