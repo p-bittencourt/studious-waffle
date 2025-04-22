@@ -4,8 +4,8 @@ This module initializes the FastAPI application, sets up routers,
 and defines the root endpoints.
 """
 
-from fastapi import FastAPI
 import logging
+from fastapi import FastAPI
 
 from .core.utils.logging import configure_logging, LogLevels
 from .core.db.conn import create_db_and_tables

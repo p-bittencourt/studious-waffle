@@ -2,13 +2,13 @@
 
 import os
 from typing import Annotated
-import psycopg2
 import logging
+import psycopg2
 from dotenv import load_dotenv
 from fastapi import Depends
 from sqlmodel import SQLModel, create_engine, Session
 
-from .user import Shopper, Vendor
+from .user import Shopper, Vendor  # pylint: disable=unused-import
 
 logger = logging.getLogger(__name__)
 load_dotenv()
@@ -22,7 +22,7 @@ DB_NAME = os.getenv("DB_NAME")
 DEFAULT_DB_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/postgres"
 
 DB_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-logger.debug(f"Target database URL: {DB_URL}")
+logger.debug("Target database URL: %s", DB_URL)
 
 
 def ensure_database_exists():
@@ -37,7 +37,7 @@ def ensure_database_exists():
             port=DB_PORT,
         )
         conn.close()
-        logger.info(f"Database '{DB_NAME}' already exists")
+        logger.info("Database '%s' already exists", DB_NAME)
     except psycopg2.OperationalError:
         # If we can't connect, the db might not exist, so connect to the default postgres DB
         conn = psycopg2.connect(
@@ -51,7 +51,7 @@ def ensure_database_exists():
         with conn.cursor() as cursor:
             cursor.execute(f'CREATE DATABASE "{DB_NAME}"')
         conn.close()
-        logger.info(f"Created database '{DB_NAME}'")
+        logger.info("Created database '%s'", DB_NAME)
 
 
 # Create engine after ensuring database exists
