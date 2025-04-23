@@ -33,25 +33,40 @@ class LocationBase(SQLModel):
 class Location(LocationBase):
     """For db storage as JSON"""
 
-    pass  # pylint: disable=unnecessary-pass
+    pass
 
 
 ### USER MODELS (not a table) ###
 
 
 # Base User model
-class UserBase(SQLModel):
-    """Common User data"""
+
+
+# Base with only common fields that users will provide on creation
+class UserCreateBase(SQLModel):
+    """Common User Input data"""
 
     name: str
     phone_number: str
     email: EmailStr
+
+
+# System-managed fields
+class UserSystemFields(SQLModel):
+    """Common User data"""
+
     status: UserStatus = UserStatus.ACTIVE
     created_at: datetime = Field(default_factory=datetime.utcnow)
     last_login: Optional[datetime] = None
 
 
-### VENDOR MODLES ###
+class UserBase(UserCreateBase, UserSystemFields):
+    """Complete user data for DB"""
+
+    pass
+
+
+### VENDOR MODELS ###
 
 
 class Vendor(UserBase, table=True):
@@ -64,16 +79,23 @@ class Vendor(UserBase, table=True):
     specialty: str = ""
     locations: List[Location] = Field(default=[], sa_column=Column(JSON))
 
+    def log_format(self) -> str:
+        """Format for logging purposes"""
+        return (
+            f"VENDOR [id={self.id}] | {self.name} | {self.email} | "
+            f"Status: {self.status} | Created: {self.created_at.strftime('%Y-%m-%d %H:%M') if self.created_at else 'N/A'}"
+        )
+
 
 class VendorCreate(UserBase):
     """DTO for creating a vendor"""
 
     password: str
-    rating: Optional[float] = None
-    bank_info: Optional[dict] = None
-    comission: Optional[float] = 0.0
-    specialty: Optional[str] = ""
-    locations: Optional[List[LocationBase]] = None
+    # rating: Optional[float] = None
+    # bank_info: Optional[dict] = None
+    # comission: Optional[float] = 0.0
+    # specialty: Optional[str] = ""
+    # locations: Optional[List[LocationBase]] = None
 
 
 class VendorPublic(UserBase):
@@ -101,8 +123,15 @@ class Shopper(UserBase, table=True):
     order_history: List[int] = Field(default=[], sa_column=Column(JSON))
     locations: List[Location] = Field(default=[], sa_column=Column(JSON))
 
+    def log_format(self) -> str:
+        """Format for logging purposes"""
+        return (
+            f"SHOPPER [id={self.id}] | {self.name} | {self.email} | "
+            f"Status: {self.status} | Created: {self.created_at.strftime('%Y-%m-%d %H:%M') if self.created_at else 'N/A'}"
+        )
 
-class ShopperCreate(UserBase):
+
+class ShopperCreate(UserCreateBase):
     """DTO for creating a shopper"""
 
     password: str

@@ -9,14 +9,16 @@ from fastapi import FastAPI
 
 from sqlmodel import select
 
+from app.core.auth.signup import register_shopper
+
 from .core.utils.logger import configure_logging, LogLevels
 from .core.db.conn import create_db_and_tables
 from .core.db.conn import DbSession
 from .core.db.seed import seed_database
-from .core.db.user import Shopper, Vendor
+from .core.db.user import Shopper, ShopperCreate, Vendor
 
 logger = logging.getLogger(__name__)
-configure_logging(LogLevels.INFO)
+configure_logging(LogLevels.DEBUG)
 
 app = FastAPI(
     title="E-Commerce API",
@@ -48,6 +50,11 @@ def get_shoppers(db: DbSession):
     """Retrieves all shoppers from the db"""
     shoppers = db.scalars(select(Shopper)).all()
     return shoppers
+
+
+@app.post("/shoppers")
+def add_shopper(db: DbSession, data: ShopperCreate):
+    register_shopper(db, data)
 
 
 @app.get("/vendors")

@@ -2,6 +2,7 @@
 # Disable specific messages/warnings
 disable=
     too-few-public-methods  # Disable warning about classes having too few public methods
+    unnecessary-pass # Disable warning about classes having unnecessary passes
 
 [FORMAT]
 # Maximum line length
