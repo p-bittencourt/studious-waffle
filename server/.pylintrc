@@ -1,0 +1,14 @@
+[MASTER]
+# Add the 'logging' module to the extensions so pylint understands its members
+extension-pkg-whitelist=logging
+
+[MESSAGES CONTROL]
+# Disable specific messages/warnings
+disable=
+    import-self,  # Disable warning about module importing itself
+    no-member,    # Disable warning about modules not having certain members (like logging.getLogger)
+    too-few-public-methods  # Disable warning about classes having too few public methods
+
+[FORMAT]
+# Maximum line length
+max-line-length=100
