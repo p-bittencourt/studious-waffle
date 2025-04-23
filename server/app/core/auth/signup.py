@@ -1,6 +1,9 @@
 """"""
 
 import logging
+
+import bcrypt
+
 from sqlmodel import Session
 from app.core.db.user import Shopper, ShopperCreate, VendorCreate
 
@@ -8,7 +11,8 @@ logger = logging.getLogger(__name__)
 
 
 def register_shopper(db: Session, data: ShopperCreate):
-    hashed_pswd = salt_password(data.password)
+    pass_bytes = data.password.encode("utf-8")
+    hashed_pswd = bcrypt.hashpw(pass_bytes, bcrypt.gensalt())
     logger.debug("Hashed password: %s", hashed_pswd)
     try:
         new_shopper = Shopper(**data.model_dump())
@@ -18,9 +22,4 @@ def register_shopper(db: Session, data: ShopperCreate):
 
 
 def register_vendor(data: VendorCreate):
-    hashed_pswd = salt_password(data.password)
-
-
-def salt_password(pswd: str) -> str:
-    salt = "12e29184y"
-    return pswd + salt
+    pass
