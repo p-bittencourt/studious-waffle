@@ -9,6 +9,7 @@ from fastapi import FastAPI
 
 from .core.utils.logging import configure_logging, LogLevels
 from .core.db.conn import create_db_and_tables
+from .core.db.seed import seed_database
 
 logger = logging.getLogger(__name__)
 configure_logging(LogLevels.INFO)
@@ -25,6 +26,10 @@ async def startup_db_client():
     """Initialize database connection on startup"""
     logger.info("Initializing database connection")
     create_db_and_tables()
+
+    # Seed the database with default profile
+    seed_database()
+
     logger.info("Database initialization complete")
 
 

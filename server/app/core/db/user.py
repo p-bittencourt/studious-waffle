@@ -97,7 +97,7 @@ class Shopper(UserBase, table=True):
     wishlist: List[int] = Field(
         default=[], sa_column=Column(JSON)
     )  # list of product IDs
-    serch_history: List[str] = Field(default=[], sa_column=Column(JSON))
+    search_history: List[str] = Field(default=[], sa_column=Column(JSON))
     order_history: List[int] = Field(default=[], sa_column=Column(JSON))
     locations: List[Location] = Field(default=[], sa_column=Column(JSON))
 
