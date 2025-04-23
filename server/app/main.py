@@ -9,7 +9,7 @@ from fastapi import FastAPI
 
 from sqlmodel import select
 
-from .core.utils.logging import configure_logging, LogLevels
+from .core.utils.logger import configure_logging, LogLevels
 from .core.db.conn import create_db_and_tables
 from .core.db.conn import DbSession
 from .core.db.seed import seed_database
