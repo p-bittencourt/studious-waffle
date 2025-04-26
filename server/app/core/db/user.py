@@ -61,6 +61,14 @@ class UserSystemFields(SQLModel):
     last_login: Optional[datetime] = None
 
 
+# Data input by user to login
+class UserLoginFields(SQLModel):
+    """User email and password"""
+
+    email: EmailStr
+    password: str
+
+
 class UserBase(UserCreateBase, UserSystemFields):
     """Complete user data for DB"""
 

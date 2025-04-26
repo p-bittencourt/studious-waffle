@@ -10,17 +10,18 @@ from fastapi import FastAPI
 from sqlmodel import select
 
 from .core.auth.signup import register_shopper, register_vendor
+from .core.auth.login import check_shopper_credentials
 
 from .core.utils.logger import configure_logging, LogLevels
 
-# from .core.db.conn import create_db_and_tables
+from .core.db.conn import create_db_and_tables
 from .core.db.conn import DbSession
-
-# from .core.db.seed import seed_database
+from .core.db.seed import seed_database
 from .core.db.user import (
     Shopper,
     ShopperCreate,
     ShopperPublic,
+    UserLoginFields,
     Vendor,
     VendorCreate,
     VendorPublic,
@@ -36,21 +37,25 @@ app = FastAPI(
 )
 
 
-# @app.on_event("startup")
-# async def startup_db_client():
-#     """Create database and tables on startup"""
-#     # create_db_and_tables()
-#
-#     # Seed the database with default profile
-#     # seed_database()
-#
-#     logger.info("Database initialization complete")
+@app.on_event("startup")
+async def startup_db_client():
+    """Create database and tables on startup"""
+    # create_db_and_tables()
+
+    # Seed the database with default profile
+    # seed_database()
+    logger.info("Database initialization complete")
 
 
 @app.get("/")
 async def root():
     """Root endpoint for the API"""
     return {"message": "Hello World"}
+
+
+@app.post("/shoppers/login")
+def shopper_login(db: DbSession, login_data: UserLoginFields):
+    return check_shopper_credentials(db, login_data)
 
 
 @app.get("/shoppers", response_model=list[ShopperPublic])
