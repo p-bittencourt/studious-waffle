@@ -9,14 +9,25 @@ from fastapi import FastAPI
 
 from sqlmodel import select
 
+from .core.auth.signup import register_shopper, register_vendor
+
 from .core.utils.logger import configure_logging, LogLevels
-from .core.db.conn import create_db_and_tables
+
+# from .core.db.conn import create_db_and_tables
 from .core.db.conn import DbSession
-from .core.db.seed import seed_database
-from .core.db.user import Shopper, Vendor
+
+# from .core.db.seed import seed_database
+from .core.db.user import (
+    Shopper,
+    ShopperCreate,
+    ShopperPublic,
+    Vendor,
+    VendorCreate,
+    VendorPublic,
+)
 
 logger = logging.getLogger(__name__)
-configure_logging(LogLevels.INFO)
+configure_logging(LogLevels.DEBUG)
 
 app = FastAPI(
     title="E-Commerce API",
@@ -25,16 +36,15 @@ app = FastAPI(
 )
 
 
-@app.on_event("startup")
-async def startup_db_client():
-    """Initialize database connection on startup"""
-    logger.info("Initializing database connection")
-    create_db_and_tables()
-
-    # Seed the database with default profile
-    seed_database()
-
-    logger.info("Database initialization complete")
+# @app.on_event("startup")
+# async def startup_db_client():
+#     """Create database and tables on startup"""
+#     # create_db_and_tables()
+#
+#     # Seed the database with default profile
+#     # seed_database()
+#
+#     logger.info("Database initialization complete")
 
 
 @app.get("/")
@@ -43,15 +53,27 @@ async def root():
     return {"message": "Hello World"}
 
 
-@app.get("/shoppers")
+@app.get("/shoppers", response_model=list[ShopperPublic])
 def get_shoppers(db: DbSession):
     """Retrieves all shoppers from the db"""
     shoppers = db.scalars(select(Shopper)).all()
     return shoppers
 
 
-@app.get("/vendors")
+@app.post("/shoppers")
+def add_shopper(db: DbSession, data: ShopperCreate):
+    """Adds a Shopper user"""
+    return register_shopper(db, data)
+
+
+@app.get("/vendors", response_model=list[VendorPublic])
 def get_vendors(db: DbSession):
     """Retrieves all vendors from the db"""
     vendors = db.scalars(select(Vendor)).all()
     return vendors
+
+
+@app.post("/vendors")
+def add_vendor(db: DbSession, data: VendorCreate):
+    """Adds a vendor user"""
+    return register_vendor(db, data)
