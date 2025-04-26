@@ -82,9 +82,14 @@ class Vendor(UserBase, table=True):
 
     def log_format(self) -> str:
         """Format for logging purposes"""
+        created_time = (
+            self.created_at.strftime("%Y-%m-%d %H:%M")
+            if hasattr(self.created_at, "strftime")
+            else "N/A"
+        )  # Formats created_at datetime if present
         return (
             f"VENDOR [id={self.id}] | {self.name} | {self.email} | "
-            f"Status: {self.status} | Created: {self.created_at.strftime('%Y-%m-%d %H:%M') if self.created_at else 'N/A'}"
+            f"Status: {self.status} | Created: {created_time}"
         )
 
 
