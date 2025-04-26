@@ -15,7 +15,7 @@ from .core.utils.logger import configure_logging, LogLevels
 from .core.db.conn import create_db_and_tables
 from .core.db.conn import DbSession
 from .core.db.seed import seed_database
-from .core.db.user import Shopper, ShopperCreate, Vendor, VendorCreate
+from .core.db.user import Shopper, ShopperCreate, ShopperPublic, Vendor, VendorCreate
 
 logger = logging.getLogger(__name__)
 configure_logging(LogLevels.DEBUG)
@@ -44,7 +44,7 @@ async def root():
     return {"message": "Hello World"}
 
 
-@app.get("/shoppers")
+@app.get("/shoppers", response_model=list[ShopperPublic])
 def get_shoppers(db: DbSession):
     """Retrieves all shoppers from the db"""
     shoppers = db.scalars(select(Shopper)).all()

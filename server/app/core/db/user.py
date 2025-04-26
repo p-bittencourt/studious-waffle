@@ -133,10 +133,21 @@ class ShopperCreate(UserCreateBase):
     password: str
 
 
-class ShopperPublic(UserBase):
+class ShopperPublic(SQLModel):
     """DTO for returning Shopper data to frontend"""
 
     id: int
-    wishlist: Optional[List[int]] = []
-    search_history: Optional[List[str]] = []
-    order_history: Optional[List[int]] = []
+    name: str
+    phone_number: str
+    email: EmailStr
+    status: UserStatus = UserStatus.ACTIVE
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    last_login: Optional[datetime] = None
+    preferences: dict = Field(default={}, sa_column=Column(JSON))
+    payment_methods: List[dict] = Field(default=[], sa_column=Column(JSON))
+    wishlist: List[int] = Field(
+        default=[], sa_column=Column(JSON)
+    )  # list of product IDs
+    search_history: List[str] = Field(default=[], sa_column=Column(JSON))
+    order_history: List[int] = Field(default=[], sa_column=Column(JSON))
+    locations: List[Location] = Field(default=[], sa_column=Column(JSON))
