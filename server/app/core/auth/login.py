@@ -11,10 +11,9 @@ def check_shopper_credentials(db: Session, login_data: UserLoginFields):
     shopper = get_shopper_by_email(db, login_data.email)
     logger.debug(f"Retrieved shopper by email {shopper}")
 
-    password_check = check_password(
-        "shopper", login_data.password, shopper.password_hash
-    )
-    # if password_check:
+    password_check = check_password(login_data.password, shopper.password_hash)
+    if password_check:
+        return {"status": "success", "message": "User logged in"}
     # return generate_access_token()
 
     return {"status": "failure", "message": "Couldn't login user"}
