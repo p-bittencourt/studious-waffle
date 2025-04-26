@@ -13,9 +13,9 @@ logger = logging.getLogger(__name__)
 
 def register_shopper(db: Session, data: ShopperCreate):
     hashed_pswd = hash_password(data.password)
-    logger.debug("Hashed password: %s", hashed_pswd)
     try:
-        new_shopper = Shopper(**data.model_dump())
+        new_shopper = Shopper(**data.model_dump(), password_hash=hashed_pswd)
+        logger.debug(f"New shopper: {new_shopper}")
         db.add(new_shopper)
         db.commit()
         db.refresh(new_shopper)

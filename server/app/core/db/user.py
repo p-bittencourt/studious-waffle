@@ -55,6 +55,7 @@ class UserCreateBase(SQLModel):
 class UserSystemFields(SQLModel):
     """Common User data"""
 
+    password_hash: str = ""
     status: UserStatus = UserStatus.ACTIVE
     created_at: datetime = Field(default_factory=datetime.utcnow)
     last_login: Optional[datetime] = None
@@ -91,11 +92,6 @@ class VendorCreate(UserBase):
     """DTO for creating a vendor"""
 
     password: str
-    # rating: Optional[float] = None
-    # bank_info: Optional[dict] = None
-    # comission: Optional[float] = 0.0
-    # specialty: Optional[str] = ""
-    # locations: Optional[List[LocationBase]] = None
 
 
 class VendorPublic(UserBase):

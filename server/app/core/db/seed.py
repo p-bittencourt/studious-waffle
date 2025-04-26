@@ -1,6 +1,7 @@
 """Database seeding utilities"""
 
 import logging
+import bcrypt
 from enum import Enum
 from typing import List, Dict, Any, Callable
 from sqlmodel import Session, select
@@ -19,6 +20,12 @@ class SeedProfile(str, Enum):
     FULL_DEMO = "full_demo"
 
 
+def create_password_hash(pswd: str) -> str:
+    """Create a password hash from plaintext password"""
+    pass_bytes = pswd.encode("utf-8")
+    return bcrypt.hashpw(pass_bytes, bcrypt.gensalt()).decode("utf-8")
+
+
 def get_minimal_vendors() -> List[Vendor]:
     """Return a minimal list of demo vendors"""
     return [
@@ -31,6 +38,7 @@ def get_minimal_vendors() -> List[Vendor]:
             bank_info={"bank": "Chase", "account": "XXXX1234"},
             comission=10.0,
             specialty="Electronics",
+            password_hash=create_password_hash("techpass123"),
             locations=[
                 {
                     "type": "store",
@@ -52,6 +60,7 @@ def get_minimal_vendors() -> List[Vendor]:
             bank_info={"bank": "Bank of America", "account": "XXXX5678"},
             comission=15.0,
             specialty="Clothing",
+            password_hash=create_password_hash("fashion456"),
             locations=[
                 {
                     "type": "warehouse",
@@ -73,8 +82,9 @@ def get_minimal_shoppers() -> List[Shopper]:
         Shopper(
             name="John Doe",
             phone_number="+1-555-111-2222",
-            email="john.doe@example.com",
+            email="john_doe@example.com",
             status=UserStatus.ACTIVE,
+            password_hash=create_password_hash("johndoe123"),
             preferences={"theme": "dark", "notifications": True},
             payment_methods=[
                 {"type": "credit_card", "last_four": "1234", "provider": "Visa"}
@@ -97,8 +107,9 @@ def get_minimal_shoppers() -> List[Shopper]:
         Shopper(
             name="Jane Smith",
             phone_number="+1-555-333-4444",
-            email="jane.smith@example.com",
+            email="jane_smith@example.com",
             status=UserStatus.ACTIVE,
+            password_hash=create_password_hash("janesmith456"),
             preferences={"theme": "light", "notifications": False},
             payment_methods=[{"type": "paypal", "email": "jane.smith@example.com"}],
             wishlist=[2, 4],

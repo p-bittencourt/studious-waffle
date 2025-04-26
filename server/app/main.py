@@ -27,16 +27,15 @@ app = FastAPI(
 )
 
 
-@app.on_event("startup")
-async def startup_db_client():
-    """Initialize database connection on startup"""
-    logger.info("Initializing database connection")
-    create_db_and_tables()
-
-    # Seed the database with default profile
-    seed_database()
-
-    logger.info("Database initialization complete")
+# @app.on_event("startup")
+# async def startup_db_client():
+#     """Create database and tables on startup"""
+#     # create_db_and_tables()
+#
+#     # Seed the database with default profile
+#     # seed_database()
+#
+#     logger.info("Database initialization complete")
 
 
 @app.get("/")
@@ -65,5 +64,5 @@ def get_vendors(db: DbSession):
 
 
 @app.post("/vendors")
-def add_vendor(db: DbSession, data: ShopperCreate):
+def add_vendor(db: DbSession, data: VendorCreate):
     return register_vendor(db, data)
