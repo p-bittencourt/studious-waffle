@@ -19,7 +19,7 @@ class UserStatus(StrEnum):
 class LocationBase(SQLModel):
     """Location auxiliary data structure"""
 
-    type: str  # pylint: disable=line-too-long # the type could be something like point of sale, warehouse for the vendor | house or office for the shopper, for instance
+    type: str  # the type could be something like point of sale, warehouse for the vendor | house or office for the shopper, for instance
     street: str
     number: str
     complement: Optional[str] = None

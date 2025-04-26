@@ -12,9 +12,11 @@ from sqlmodel import select
 from .core.auth.signup import register_shopper, register_vendor
 
 from .core.utils.logger import configure_logging, LogLevels
-from .core.db.conn import create_db_and_tables
+
+# from .core.db.conn import create_db_and_tables
 from .core.db.conn import DbSession
-from .core.db.seed import seed_database
+
+# from .core.db.seed import seed_database
 from .core.db.user import (
     Shopper,
     ShopperCreate,
@@ -60,6 +62,7 @@ def get_shoppers(db: DbSession):
 
 @app.post("/shoppers")
 def add_shopper(db: DbSession, data: ShopperCreate):
+    """Adds a Shopper user"""
     return register_shopper(db, data)
 
 
@@ -72,4 +75,5 @@ def get_vendors(db: DbSession):
 
 @app.post("/vendors")
 def add_vendor(db: DbSession, data: VendorCreate):
+    """Adds a vendor user"""
     return register_vendor(db, data)

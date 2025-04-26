@@ -12,10 +12,10 @@ logger = logging.getLogger(__name__)
 
 
 def register_shopper(db: Session, data: ShopperCreate):
+    """Adds a new Shopper user"""
     hashed_pswd = hash_password(data.password)
     try:
         new_shopper = Shopper(**data.model_dump(), password_hash=hashed_pswd)
-        logger.debug(f"New shopper: {new_shopper}")
         db.add(new_shopper)
         db.commit()
         db.refresh(new_shopper)
@@ -29,10 +29,10 @@ def register_shopper(db: Session, data: ShopperCreate):
 
 
 def register_vendor(db: Session, data: VendorCreate):
+    """Registers a new Vendor user"""
     hashed_pswd = hash_password(data.password)
     try:
         new_vendor = Vendor(**data.model_dump(), password_hash=hashed_pswd)
-        logger.debug(f"New vendor: {new_vendor}")
         db.add(new_vendor)
         db.commit()
         db.refresh(new_vendor)
@@ -46,5 +46,6 @@ def register_vendor(db: Session, data: VendorCreate):
 
 
 def hash_password(pswd: str):
+    """Gets bytes from the string, returns hash with bcrypt"""
     pass_bytes = pswd.encode("utf-8")
     return bcrypt.hashpw(pass_bytes, bcrypt.gensalt())

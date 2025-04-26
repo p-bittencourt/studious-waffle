@@ -1,9 +1,10 @@
 """Database seeding utilities"""
 
 import logging
-import bcrypt
 from enum import Enum
 from typing import List, Dict, Any, Callable
+
+import bcrypt
 from sqlmodel import Session, select
 
 from .conn import engine
