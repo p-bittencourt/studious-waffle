@@ -1,4 +1,4 @@
-""""""
+"""Sign up functions for Shopper and Vendor users"""
 
 import logging
 
@@ -30,9 +30,9 @@ def register_shopper(db: Session, data: ShopperCreate):
 
 def register_vendor(db: Session, data: VendorCreate):
     hashed_pswd = hash_password(data.password)
-    logger.debug("Hashed password: %s", hashed_pswd)
     try:
-        new_vendor = Vendor(**data.model_dump())
+        new_vendor = Vendor(**data.model_dump(), password_hash=hashed_pswd)
+        logger.debug(f"New vendor: {new_vendor}")
         db.add(new_vendor)
         db.commit()
         db.refresh(new_vendor)

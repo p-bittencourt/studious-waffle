@@ -88,19 +88,27 @@ class Vendor(UserBase, table=True):
         )
 
 
-class VendorCreate(UserBase):
+class VendorCreate(UserCreateBase):
     """DTO for creating a vendor"""
 
     password: str
 
 
-class VendorPublic(UserBase):
+class VendorPublic(SQLModel):
     """DTO for returning Vendor data to frontend"""
 
     id: int
-    rating: Optional[float]
-    specialty: str
-    locations: List[Location] = []
+    name: str
+    phone_number: str
+    email: EmailStr
+    status: UserStatus = UserStatus.ACTIVE
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    last_login: Optional[datetime] = None
+    rating: Optional[float] = None
+    bank_info: dict = Field(default={}, sa_column=Column(JSON))
+    comission: float = 0.0
+    specialty: str = ""
+    locations: List[Location] = Field(default=[], sa_column=Column(JSON))
 
 
 ### SHOPPER MODELS ###

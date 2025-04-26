@@ -15,7 +15,14 @@ from .core.utils.logger import configure_logging, LogLevels
 from .core.db.conn import create_db_and_tables
 from .core.db.conn import DbSession
 from .core.db.seed import seed_database
-from .core.db.user import Shopper, ShopperCreate, ShopperPublic, Vendor, VendorCreate
+from .core.db.user import (
+    Shopper,
+    ShopperCreate,
+    ShopperPublic,
+    Vendor,
+    VendorCreate,
+    VendorPublic,
+)
 
 logger = logging.getLogger(__name__)
 configure_logging(LogLevels.DEBUG)
@@ -56,7 +63,7 @@ def add_shopper(db: DbSession, data: ShopperCreate):
     return register_shopper(db, data)
 
 
-@app.get("/vendors")
+@app.get("/vendors", response_model=list[VendorPublic])
 def get_vendors(db: DbSession):
     """Retrieves all vendors from the db"""
     vendors = db.scalars(select(Vendor)).all()
