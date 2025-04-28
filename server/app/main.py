@@ -9,21 +9,14 @@ from typing import Annotated
 from fastapi import Depends, FastAPI
 
 from fastapi.security import OAuth2PasswordRequestForm
-from sqlmodel import select
 
 from .core.auth.current_user import get_current_user
-from .core.auth.signup import register_shopper, register_vendor
 from .core.auth.login import login_for_access_token
 from .core.utils.logger import configure_logging, LogLevels
 from .core.db.conn import DbSession
-from .core.db.user import (
-    Shopper,
-    ShopperCreate,
-    ShopperPublic,
-    Vendor,
-    VendorCreate,
-    VendorPublic,
-)
+
+from .services.shopper.routes import router as shopper_router
+from .services.vendor.routes import router as vendor_router
 
 # from .core.db.conn import create_db_and_tables
 # from .core.db.seed import seed_database
@@ -37,6 +30,9 @@ app = FastAPI(
     description="Exercise done for Roadmap.sh Python roadmap",
     version="0.1.0",
 )
+
+app.include_router(shopper_router)
+app.include_router(vendor_router)
 
 
 @app.on_event("startup")
@@ -65,29 +61,3 @@ def read_protected_items(current_user: Annotated[str, Depends(get_current_user)]
 def login(db: DbSession, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
     """Login endpoint"""
     return login_for_access_token(db, form_data)
-
-
-@app.get("/shoppers", response_model=list[ShopperPublic])
-def get_shoppers(db: DbSession):
-    """Retrieves all shoppers from the db"""
-    shoppers = db.scalars(select(Shopper)).all()
-    return shoppers
-
-
-@app.post("/shoppers")
-def add_shopper(db: DbSession, data: ShopperCreate):
-    """Adds a Shopper user"""
-    return register_shopper(db, data)
-
-
-@app.get("/vendors", response_model=list[VendorPublic])
-def get_vendors(db: DbSession):
-    """Retrieves all vendors from the db"""
-    vendors = db.scalars(select(Vendor)).all()
-    return vendors
-
-
-@app.post("/vendors")
-def add_vendor(db: DbSession, data: VendorCreate):
-    """Adds a vendor user"""
-    return register_vendor(db, data)
