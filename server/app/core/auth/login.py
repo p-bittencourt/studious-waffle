@@ -4,13 +4,22 @@ import bcrypt
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 import jwt
+from pydantic import BaseModel
 from sqlmodel import Session, select
 from app.core.db.user import Shopper
-from app.core.utils.exceptions import NotFound
 from app.core.config import Settings
 
 logger = logging.getLogger(__name__)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+
+class TokenData(BaseModel):
+    email: str
 
 
 def login_for_access_token(
@@ -24,10 +33,10 @@ def login_for_access_token(
             headers={"WWW-Authenticate": "Bearer"},
         )
     token = generate_access_token(form_data.username)
-    return {"access_token": token, "token_type": "bearer"}
+    return Token(access_token=token, token_type="bearer")
 
 
-def authenticate_shopper(db: Session, user_email: str, user_password: str):
+def authenticate_shopper(db: Session, user_email: str, user_password: str) -> bool:
     shopper = get_shopper_by_email(db, user_email)
     if not shopper:
         return False
@@ -51,11 +60,11 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
         user_email = payload.get("sub")
         if user_email is None:
             raise credentials_exception
-        token_data = {"email": user_email}
+        token_data = TokenData(email=user_email)
     except jwt.InvalidTokenError:
         raise credentials_exception
 
-    shopper = get_shopper_by_email(token_data["email"])
+    shopper = get_shopper_by_email(token_data.email)
     return shopper
 
 
