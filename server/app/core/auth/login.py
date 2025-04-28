@@ -2,16 +2,14 @@ import logging
 from typing import Annotated
 import bcrypt
 from fastapi import Depends, HTTPException
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordRequestForm
 import jwt
 from pydantic import BaseModel
 from sqlmodel import Session, select
-from app.core.db.conn import DbSession
 from app.core.db.user import Shopper
 from app.core.config import Settings
 
 logger = logging.getLogger(__name__)
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 
 class Token(BaseModel):
@@ -42,26 +40,6 @@ def authenticate_shopper(db: Session, user_email: str, user_password: str) -> bo
         return False
 
     return True
-
-
-# TODO: We're using "user" as the name; but there should be
-# login routes for both Shopper and Vendor since they're on different tables
-def get_current_user(db: DbSession, token: Annotated[str, Depends(oauth2_scheme)]):
-    credentials_exception = HTTPException(
-        status_code=401,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    try:
-        payload = decode_token(token)
-        user_email = payload.get("email")
-        if user_email is None:
-            raise credentials_exception
-    except jwt.InvalidTokenError:
-        raise credentials_exception
-
-    shopper = get_shopper_by_email(db, user_email)
-    return shopper
 
 
 def generate_access_token(email: str):

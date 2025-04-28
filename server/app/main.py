@@ -11,8 +11,10 @@ from fastapi import Depends, FastAPI
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel import select
 
+from app.core.auth.current_user import CurrentUser
+
 from .core.auth.signup import register_shopper, register_vendor
-from .core.auth.login import login_for_access_token, get_current_user
+from .core.auth.login import login_for_access_token
 
 from .core.utils.logger import configure_logging, LogLevels
 
@@ -55,7 +57,7 @@ async def root():
 
 
 @app.get("/protected")
-def read_protected_items(current_user: Annotated[str, Depends(get_current_user)]):
+def read_protected_items(current_user: Annotated[str, Depends(CurrentUser())]):
     return {"current_user": current_user}
 
 
