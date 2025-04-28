@@ -5,12 +5,14 @@ and defines the root endpoints.
 """
 
 import logging
-from fastapi import FastAPI
+from typing import Annotated
+from fastapi import Depends, FastAPI
 
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel import select
 
 from .core.auth.signup import register_shopper, register_vendor
-from .core.auth.login import check_shopper_credentials
+from .core.auth.login import login_for_access_token, get_current_user
 
 from .core.utils.logger import configure_logging, LogLevels
 
@@ -21,7 +23,6 @@ from .core.db.user import (
     Shopper,
     ShopperCreate,
     ShopperPublic,
-    UserLoginFields,
     Vendor,
     VendorCreate,
     VendorPublic,
@@ -53,9 +54,16 @@ async def root():
     return {"message": "Hello World"}
 
 
-@app.post("/shoppers/login")
-def shopper_login(db: DbSession, login_data: UserLoginFields):
-    return check_shopper_credentials(db, login_data)
+@app.get("/protected")
+def read_protected_items(current_user: Annotated[str, Depends(get_current_user)]):
+    return {"current_user": current_user}
+
+
+@app.post("/login")
+def shopper_login(
+    db: DbSession, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
+):
+    return login_for_access_token(db, form_data)
 
 
 @app.get("/shoppers", response_model=list[ShopperPublic])

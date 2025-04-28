@@ -1,41 +1,78 @@
 import logging
+from typing import Annotated
 import bcrypt
+from fastapi import Depends, HTTPException
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 import jwt
 from sqlmodel import Session, select
-from app.core.db.user import Shopper, UserLoginFields
+from app.core.db.user import Shopper
 from app.core.utils.exceptions import NotFound
 from app.core.config import Settings
 
 logger = logging.getLogger(__name__)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 
-def check_shopper_credentials(db: Session, login_data: UserLoginFields):
-    shopper = get_shopper_by_email(db, login_data.email)
-    logger.debug(f"Retrieved shopper by email {shopper}")
+def login_for_access_token(
+    db: Session, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
+):
+    shopper = authenticate_shopper(db, form_data.username, form_data.password)
+    if not shopper:
+        raise HTTPException(
+            status_code=401,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    token = generate_access_token(form_data.username)
+    return {"access_token": token, "token_type": "bearer"}
 
-    password_check = check_password(login_data.password, shopper.password_hash)
+
+def authenticate_shopper(db: Session, user_email: str, user_password: str):
+    shopper = get_shopper_by_email(db, user_email)
+    password_check = check_password(user_password, shopper.password_hash)
     if password_check:
-        token = generate_access_token()
-        logger.debug("JWT token %s", token)
-        return {"status": "success", "message": "User logged in"}
-    # return generate_access_token()
+        return True
 
-    return {"status": "failure", "message": "Couldn't login user"}
+    return False
 
 
-def generate_access_token():
+# TODO: We're using "user" as the name; but there should be
+# login routes for both Shopper and Vendor since they're on different tables
+def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
+    credentials_exception = HTTPException(
+        status_code=401,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = decode_token(token)
+        user_email = payload.get("sub")
+        if user_email is None:
+            raise credentials_exception
+        token_data = {"email": user_email}
+    except jwt.InvalidTokenError:
+        raise credentials_exception
+
+    shopper = get_shopper_by_email(token_data["email"])
+    return shopper
+
+
+def generate_access_token(email: str):
     key = Settings.JWT_SECRET
-    encoded = jwt.encode({"some": "payload"}, key, algorithm="HS256")
+    encoded = jwt.encode({"email": email}, key, algorithm="HS256")
     return encoded
 
 
+def decode_token(token):
+    key = Settings.JWT_SECRET
+    decoded = jwt.decode(token, key, algorithms="HS256")
+    return decoded
+
+
 def check_password(submitted_password: str, hashed_password: str) -> bool:
-    if bcrypt.checkpw(
+    return bcrypt.checkpw(
         submitted_password.encode("utf-8"), hashed_password.encode("utf-8")
-    ):
-        return True
-    else:
-        return False
+    )
 
 
 def get_shopper_by_email(db: Session, user_email: str):
