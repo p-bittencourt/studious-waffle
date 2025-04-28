@@ -11,7 +11,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 import jwt
 from pydantic import BaseModel
 from sqlmodel import Session, select
-from app.core.db.user import Shopper
+from app.core.db.user import Shopper, Vendor
 from app.core.config import Settings
 from app.core.utils.exceptions import CredentialsException
 
@@ -43,7 +43,8 @@ def login_for_access_token(
         HTTPException: If authentication fails
     """
     shopper = authenticate_shopper(db, form_data.username, form_data.password)
-    if not shopper:
+    vendor = authenticate_vendor(db, form_data.username, form_data.password)
+    if not shopper and not vendor:
         raise CredentialsException(
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
@@ -68,6 +69,17 @@ def authenticate_shopper(db: Session, user_email: str, user_password: str) -> bo
     if not shopper:
         return False
     password_check = check_password(user_password, shopper.password_hash)
+    if not password_check:
+        return False
+
+    return True
+
+
+def authenticate_vendor(db: Session, user_email: str, user_password: str) -> bool:
+    vendor = get_vendor_by_email(db, user_email)
+    if not vendor:
+        return False
+    password_check = check_password(user_password, vendor.password_hash)
     if not password_check:
         return False
 
@@ -131,5 +143,20 @@ def get_shopper_by_email(db: Session, user_email: str):
     Returns:
         Shopper: Shopper object if found, None otherwise
     """
-    user = db.scalar(select(Shopper).where(Shopper.email == user_email))
-    return user
+    shopper = db.scalar(select(Shopper).where(Shopper.email == user_email))
+    return shopper
+
+
+def get_vendor_by_email(db: Session, user_email: str):
+    """
+    Retrieve vendor record from database by email.
+
+    Args:
+        db: Database session
+        user_email: Email address to search for
+
+    Returns:
+        Vendor: Vendor object if found, None otherwise
+    """
+    vendor = db.scalar(select(Vendor).where(Vendor.email == user_email))
+    return vendor

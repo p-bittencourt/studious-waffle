@@ -8,7 +8,7 @@ from fastapi.security import OAuth2PasswordBearer
 import jwt
 from app.core.db.conn import DbSession
 from app.core.utils.exceptions import CredentialsException
-from .login import decode_token, get_shopper_by_email
+from .login import decode_token, get_shopper_by_email, get_vendor_by_email
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
@@ -23,6 +23,8 @@ def get_current_user(db: DbSession, token: str = Depends(oauth2_scheme)):
 
     Returns:
         Shopper: The authenticated shopper user object
+            or
+        Vendor: The authenticated vendor user object
 
     Raises:
         HTTPException: If token is invalid or user cannot be found
@@ -34,5 +36,10 @@ def get_current_user(db: DbSession, token: str = Depends(oauth2_scheme)):
             raise CredentialsException(detail="Payload didn't contain expected data")
     except jwt.InvalidTokenError as exc:
         raise CredentialsException(detail="Invalid token error") from exc
+
     shopper = get_shopper_by_email(db, user_email)
-    return shopper
+    if shopper:
+        return shopper
+
+    vendor = get_vendor_by_email(db, user_email)
+    return vendor
