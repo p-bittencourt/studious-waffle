@@ -6,13 +6,14 @@ Provides functions for user authentication, password verification, and JWT token
 import logging
 from typing import Annotated
 import bcrypt
-from fastapi import Depends, HTTPException
+from fastapi import Depends
 from fastapi.security import OAuth2PasswordRequestForm
 import jwt
 from pydantic import BaseModel
 from sqlmodel import Session, select
 from app.core.db.user import Shopper
 from app.core.config import Settings
+from app.core.utils.exceptions import CredentialsException
 
 
 logger = logging.getLogger(__name__)
@@ -43,8 +44,7 @@ def login_for_access_token(
     """
     shopper = authenticate_shopper(db, form_data.username, form_data.password)
     if not shopper:
-        raise HTTPException(
-            status_code=401,
+        raise CredentialsException(
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
