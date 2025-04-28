@@ -6,8 +6,8 @@ import psycopg2
 from fastapi import Depends
 from sqlmodel import SQLModel, create_engine, Session
 
-from .user import Shopper, Vendor  # pylint: disable=unused-import
 from app.core.config import Settings
+from .user import Shopper, Vendor  # pylint: disable=unused-import
 
 logger = logging.getLogger(__name__)
 

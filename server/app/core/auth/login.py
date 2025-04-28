@@ -76,6 +76,17 @@ def authenticate_shopper(db: Session, user_email: str, user_password: str) -> bo
 
 
 def authenticate_vendor(db: Session, user_email: str, user_password: str) -> bool:
+    """
+    Verify vendor credentials against stored database values.
+
+    Args:
+        db: Database session
+        user_email: Email address of the vendor
+        user_password: Password submitted by the vendor
+
+    Returns:
+        bool: True if authentication succeeds, False otherwise
+    """
     vendor = get_vendor_by_email(db, user_email)
     if not vendor:
         return False

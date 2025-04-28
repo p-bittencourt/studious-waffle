@@ -11,16 +11,11 @@ from fastapi import Depends, FastAPI
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel import select
 
-from app.core.auth.current_user import get_current_user
-
+from .core.auth.current_user import get_current_user
 from .core.auth.signup import register_shopper, register_vendor
 from .core.auth.login import login_for_access_token
-
 from .core.utils.logger import configure_logging, LogLevels
-
-from .core.db.conn import create_db_and_tables
 from .core.db.conn import DbSession
-from .core.db.seed import seed_database
 from .core.db.user import (
     Shopper,
     ShopperCreate,
@@ -29,6 +24,10 @@ from .core.db.user import (
     VendorCreate,
     VendorPublic,
 )
+
+# from .core.db.conn import create_db_and_tables
+# from .core.db.seed import seed_database
+
 
 logger = logging.getLogger(__name__)
 configure_logging(LogLevels.DEBUG)
@@ -58,13 +57,13 @@ async def root():
 
 @app.get("/protected")
 def read_protected_items(current_user: Annotated[str, Depends(get_current_user)]):
+    """Protected endpoint for testing authenticated route"""
     return {"current_user": current_user}
 
 
 @app.post("/login")
-def shopper_login(
-    db: DbSession, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
-):
+def login(db: DbSession, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
+    """Login endpoint"""
     return login_for_access_token(db, form_data)
 
 
