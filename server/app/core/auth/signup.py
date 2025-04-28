@@ -1,9 +1,10 @@
-"""Sign up functions for Shopper and Vendor users"""
+"""
+User registration module for the application.
+Provides functions to register new Shopper and Vendor accounts with secure password handling.
+"""
 
 import logging
-
 import bcrypt
-
 from sqlmodel import Session
 from app.core.db.user import Shopper, ShopperCreate, Vendor, VendorCreate
 from app.core.utils.exceptions import BadRequest
@@ -12,7 +13,19 @@ logger = logging.getLogger(__name__)
 
 
 def register_shopper(db: Session, data: ShopperCreate):
-    """Adds a new Shopper user"""
+    """
+    Register a new Shopper user in the system.
+
+    Args:
+        db: Database session
+        data: ShopperCreate model containing user registration information
+
+    Returns:
+        dict: Status message indicating successful registration
+
+    Raises:
+        BadRequest: If registration fails for any reason
+    """
     hashed_pswd = hash_password(data.password)
     try:
         new_shopper = Shopper(**data.model_dump(), password_hash=hashed_pswd)
@@ -29,7 +42,19 @@ def register_shopper(db: Session, data: ShopperCreate):
 
 
 def register_vendor(db: Session, data: VendorCreate):
-    """Registers a new Vendor user"""
+    """
+    Register a new Vendor user in the system.
+
+    Args:
+        db: Database session
+        data: VendorCreate model containing vendor registration information
+
+    Returns:
+        dict: Status message indicating successful registration
+
+    Raises:
+        BadRequest: If registration fails for any reason
+    """
     hashed_pswd = hash_password(data.password)
     try:
         new_vendor = Vendor(**data.model_dump(), password_hash=hashed_pswd)
@@ -46,6 +71,14 @@ def register_vendor(db: Session, data: VendorCreate):
 
 
 def hash_password(pswd: str):
-    """Gets bytes from the string, returns hash with bcrypt"""
+    """
+    Hash a password using bcrypt algorithm for secure storage.
+
+    Args:
+        pswd: Plain text password to hash
+
+    Returns:
+        bytes: Hashed password ready for database storage
+    """
     pass_bytes = pswd.encode("utf-8")
     return bcrypt.hashpw(pass_bytes, bcrypt.gensalt())
