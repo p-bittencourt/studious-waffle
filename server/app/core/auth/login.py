@@ -29,11 +29,13 @@ def login_for_access_token(
 
 def authenticate_shopper(db: Session, user_email: str, user_password: str):
     shopper = get_shopper_by_email(db, user_email)
+    if not shopper:
+        return False
     password_check = check_password(user_password, shopper.password_hash)
-    if password_check:
-        return True
+    if not password_check:
+        return False
 
-    return False
+    return True
 
 
 # TODO: We're using "user" as the name; but there should be
@@ -77,6 +79,4 @@ def check_password(submitted_password: str, hashed_password: str) -> bool:
 
 def get_shopper_by_email(db: Session, user_email: str):
     user = db.scalar(select(Shopper).where(Shopper.email == user_email))
-    if not user:
-        raise NotFound()
     return user
