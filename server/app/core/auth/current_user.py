@@ -44,7 +44,10 @@ def get_current_user(db: DbSession, token: str = Depends(oauth2_scheme)):
         return shopper
 
     vendor = get_vendor_by_email(db, user_email)
-    return vendor
+    if vendor:
+        return vendor
+
+    raise CredentialsException(detail="User not found")
 
 
 ShopperUser = Annotated[Shopper, Depends(get_current_user)]
