@@ -3,10 +3,12 @@ User authentication dependency module.
 Provides functionality to extract and validate the current authenticated user from request tokens.
 """
 
+from typing import Annotated
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 import jwt
 from app.core.db.conn import DbSession
+from app.core.db.user import Shopper, Vendor
 from app.core.utils.exceptions import CredentialsException
 from .login import decode_token, get_shopper_by_email, get_vendor_by_email
 
@@ -43,3 +45,7 @@ def get_current_user(db: DbSession, token: str = Depends(oauth2_scheme)):
 
     vendor = get_vendor_by_email(db, user_email)
     return vendor
+
+
+ShopperUser = Annotated[Shopper, Depends(get_current_user)]
+VendorUser = Annotated[Vendor, Depends(get_current_user)]

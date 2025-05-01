@@ -10,7 +10,7 @@ from fastapi import Depends, FastAPI
 
 from fastapi.security import OAuth2PasswordRequestForm
 
-from .core.auth.current_user import get_current_user
+from .core.auth.current_user import ShopperUser, get_current_user
 from .core.auth.login import login_for_access_token
 from .core.utils.logger import configure_logging, LogLevels
 from .core.db.conn import DbSession
@@ -52,9 +52,9 @@ async def root():
 
 
 @app.get("/protected")
-def read_protected_items(current_user: Annotated[str, Depends(get_current_user)]):
+def read_protected_items(shopper_user: ShopperUser):
     """Protected endpoint for testing authenticated route"""
-    return {"current_user": current_user}
+    return {"current_user": shopper_user}
 
 
 @app.post("/login")
