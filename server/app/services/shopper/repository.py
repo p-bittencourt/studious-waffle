@@ -12,21 +12,21 @@ logger = logging.getLogger(__name__)
 class ShopperRepository(BaseRepository):
     """Repository for Shopper database operations"""
 
-    def get_shoppers(db: Session) -> List[Shopper]:
-        """Retrieves all shoppers from the db"""
-        return db.scalars(select(Shopper)).all()
+    # def get_shoppers(db: Session) -> List[Shopper]:
+    #     """Retrieves all shoppers from the db"""
+    #     return db.scalars(select(Shopper)).all()
 
-    def get_shopper_id(db: Session, shopper_id: str) -> Shopper:
-        """Retrieves a shopper by ID"""
-        return db.scalar(select(Shopper).where(Shopper.id == shopper_id))
+    # def get_shopper_id(db: Session, shopper_id: str) -> Shopper:
+    #     """Retrieves a shopper by ID"""
+    #     return db.scalar(select(Shopper).where(Shopper.id == shopper_id))
 
-    def get_shopper_email(db: Session, shopper_email: str) -> Shopper:
-        """Retrieves a shopper by email"""
-        return db.scalar(select(Shopper).where(Shopper.email == shopper_email))
+    # def get_shopper_email(db: Session, shopper_email: str) -> Shopper:
+    #     """Retrieves a shopper by email"""
+    #     return db.scalar(select(Shopper).where(Shopper.email == shopper_email))
 
-    def get_shopper_name(db: Session, shopper_name: str) -> Shopper:
-        """Retrieves a shopper by name"""
-        return db.scalar(select(Shopper).where(Shopper.email == shopper_name))
+    # def get_shopper_name(db: Session, shopper_name: str) -> Shopper:
+    #     """Retrieves a shopper by name"""
+    #     return db.scalar(select(Shopper).where(Shopper.email == shopper_name))
 
     def update_shopper(db: Session, shopper: Shopper, data: ShopperUpdate) -> Shopper:
         """Updates shopper data"""

@@ -26,7 +26,9 @@ class ShopperService:
 
     def get_shopper_email(db: Session, shopper_email: str) -> ShopperPublic:
         """Retrieves a shopper by email"""
-        shopper = ShopperRepository.get_shopper_email(db, shopper_email)
+        shopper = ShopperRepository.get_item_by_property(
+            db, Shopper, "email", shopper_email
+        )
         if not shopper:
             logger.warning("User with id %s was not found")
             raise NotFound(detail="User not found")
@@ -37,7 +39,7 @@ class ShopperService:
         db: Session, shopper_id: str, update_data: ShopperUpdate
     ) -> ShopperPublic:
         """Updates shopper data"""
-        shopper = ShopperRepository.get_shopper_id(db, shopper_id)
+        shopper = ShopperService.get_shopper_id(db, shopper_id)
         if not shopper:
             logger.warning("User with id %s was not found")
             raise NotFound(detail="User not found")
@@ -47,6 +49,6 @@ class ShopperService:
 
     def delete_shopper(db: Session, shopper_id: str):
         """Deletes a shopper"""
-        shopper = ShopperRepository.get_shopper_id(db, shopper_id)
+        shopper = ShopperService.get_shopper_id(db, shopper_id)
 
         return ShopperRepository.delete_shopper(db, shopper)
