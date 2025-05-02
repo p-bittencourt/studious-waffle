@@ -2,7 +2,7 @@ import logging
 from typing import List
 from sqlmodel import Session
 
-from app.core.db.user import ShopperPublic, ShopperUpdate
+from app.core.db.user import Shopper, ShopperPublic, ShopperUpdate
 from app.core.utils.exceptions import NotFound
 from .repository import ShopperRepository
 
@@ -13,12 +13,11 @@ class ShopperService:
 
     def get_shoppers(db: Session) -> List[ShopperPublic]:
         """Retrieves all shoppers from the db"""
-        shoppers = ShopperRepository.get_shoppers(db)
-        return shoppers
+        return ShopperRepository.get_items(db, Shopper)
 
     def get_shopper_id(db: Session, shopper_id: str) -> ShopperPublic:
         """Retrieves a shopper by ID"""
-        shopper = ShopperRepository.get_shopper_id(db, shopper_id)
+        shopper = ShopperRepository.get_item_id(db, Shopper, shopper_id)
         return shopper
 
     def get_shopper_email(db: Session, shopper_email: str) -> ShopperPublic:

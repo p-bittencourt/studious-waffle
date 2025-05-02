@@ -12,7 +12,7 @@ router = APIRouter(prefix="/shoppers", tags=["shoppers"])
 @router.get("/", response_model=list[ShopperPublic])
 def get_shoppers(db: DbSession):
     """Retrieves all shoppers from the db"""
-    shoppers = ShopperService.get_shoppers(db)
+    shoppers = ShopperService.new_get_shoppers(db)
     return shoppers
 
 

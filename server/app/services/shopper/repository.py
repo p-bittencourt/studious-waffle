@@ -3,12 +3,13 @@ from typing import List
 from sqlmodel import Session, select, update
 
 from app.core.db.user import Shopper, ShopperUpdate
+from app.core.repository import BaseRepository
 from app.core.utils.exceptions import BadRequest
 
 logger = logging.getLogger(__name__)
 
 
-class ShopperRepository:
+class ShopperRepository(BaseRepository):
     """Repository for Shopper database operations"""
 
     def get_shoppers(db: Session) -> List[Shopper]:
