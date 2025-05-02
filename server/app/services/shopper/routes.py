@@ -3,7 +3,7 @@ from sqlmodel import select
 
 from app.core.auth.signup import register_shopper
 from app.core.db.conn import DbSession
-from app.core.db.user import ShopperCreate, ShopperPublic
+from app.core.db.user import ShopperCreate, ShopperPublic, ShopperUpdate
 
 from . import service
 
@@ -24,7 +24,14 @@ def get_shopper_id(db: DbSession, shopper_id: str):
     return shopper
 
 
-@router.post("/")
+@router.post("/{shopper_id}", response_model=ShopperPublic)
+def update_shopper(db: DbSession, shopper_id: str, update_data: ShopperUpdate):
+    """Updates shopper data"""
+    shopper = service.update_shopper(db, shopper_id, update_data)
+    return shopper
+
+
+@router.post("/signup")
 def add_shopper(db: DbSession, data: ShopperCreate):
     """Adds a Shopper user"""
     return register_shopper(db, data)

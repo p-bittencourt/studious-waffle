@@ -1,5 +1,7 @@
 from sqlmodel import Session
 
+from app.core.db.user import ShopperUpdate
+
 from . import repository
 
 
@@ -18,4 +20,10 @@ def get_shopper_id(db: Session, shopper_id: str):
 def get_shopper_email(db: Session, shopper_email: str):
     """Retrieves a shopper by email"""
     shopper = repository.get_shopper_email(db, shopper_email)
+    return shopper
+
+
+def update_shopper(db: Session, shopper_id: str, update_data: ShopperUpdate):
+    """Updates shopper data"""
+    shopper = repository.update_shopper(db, shopper_id, update_data)
     return shopper

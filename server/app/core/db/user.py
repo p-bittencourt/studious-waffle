@@ -124,6 +124,22 @@ class VendorPublic(SQLModel):
     locations: List[Location] = Field(default=[], sa_column=Column(JSON))
 
 
+class VendorUpdate(SQLModel):
+    """DTO for data update"""
+
+    name: Optional[str] = None
+    phone_number: Optional[str] = None
+    email: Optional[EmailStr] = None
+    status: Optional[UserStatus] = None
+    created_at: Optional[datetime] = None
+    last_login: Optional[datetime] = None
+    rating: Optional[float] = None
+    bank_info: Optional[dict] = None
+    comission: Optional[float] = None
+    specialty: Optional[str] = None
+    locations: Optional[List[Location]] = None
+
+
 ### SHOPPER MODELS ###
 
 
@@ -177,3 +193,20 @@ class ShopperPublic(SQLModel):
     search_history: List[str] = Field(default=[], sa_column=Column(JSON))
     order_history: List[int] = Field(default=[], sa_column=Column(JSON))
     locations: List[Location] = Field(default=[], sa_column=Column(JSON))
+
+
+class ShopperUpdate(SQLModel):
+    """DTO for data update"""
+
+    name: Optional[str] = None
+    phone_number: Optional[str] = None
+    email: Optional[EmailStr] = None
+    status: Optional[UserStatus] = None
+    created_at: Optional[datetime] = None
+    last_login: Optional[datetime] = None
+    preferences: Optional[dict] = None
+    payment_methods: Optional[List[dict]] = None
+    wishlist: Optional[List[int]] = None  # list of product IDs
+    search_history: Optional[List[str]] = None
+    order_history: Optional[List[int]] = None
+    locations: Optional[List[Location]] = None
