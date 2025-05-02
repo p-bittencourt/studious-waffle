@@ -2,6 +2,8 @@ import logging
 from typing import List
 from sqlmodel import Session, SQLModel, select, update
 
+from app.core.utils.exceptions import BadRequest
+
 logger = logging.getLogger(__name__)
 
 
@@ -22,3 +24,21 @@ class BaseRepository:
         return db.scalar(
             select(model).where(getattr(model, db_property) == item_property)
         )
+
+    def update_item(db: Session, model: SQLModel, item: SQLModel, data: any):
+        """Updates an item"""
+        update_data = {k: v for k, v in data.model_dump().items() if v is not None}
+        if not update_data:
+            logger.warning("Couldn't update model #%s", item.id)
+            raise BadRequest(detail="No update data provided")
+
+        stmt = (
+            update(model)
+            .where(getattr(model, "id") == getattr(item, "id"))
+            .values(update_data)
+        )
+        db.exec(stmt)
+        db.commit()
+        db.refresh(item)
+
+        return item

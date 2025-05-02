@@ -28,19 +28,19 @@ class ShopperRepository(BaseRepository):
     #     """Retrieves a shopper by name"""
     #     return db.scalar(select(Shopper).where(Shopper.email == shopper_name))
 
-    def update_shopper(db: Session, shopper: Shopper, data: ShopperUpdate) -> Shopper:
-        """Updates shopper data"""
-        update_data = {k: v for k, v in data.model_dump().items() if v is not None}
-        if not update_data:
-            logger.warning("Couldn't update shopper %s", shopper.name)
-            raise BadRequest(detail="No update data provided")
+    # def update_shopper(db: Session, shopper: Shopper, data: ShopperUpdate) -> Shopper:
+    #     """Updates shopper data"""
+    #     update_data = {k: v for k, v in data.model_dump().items() if v is not None}
+    #     if not update_data:
+    #         logger.warning("Couldn't update shopper %s", shopper.name)
+    #         raise BadRequest(detail="No update data provided")
 
-        stmt = update(Shopper).where(Shopper.id == shopper.id).values(update_data)
-        db.exec(stmt)
-        db.commit()
-        db.refresh(shopper)
+    #     stmt = update(Shopper).where(Shopper.id == shopper.id).values(update_data)
+    #     db.exec(stmt)
+    #     db.commit()
+    #     db.refresh(shopper)
 
-        return shopper
+    #     return shopper
 
     def delete_shopper(db: Session, shopper: Shopper):
         """Deletes shopper data"""
