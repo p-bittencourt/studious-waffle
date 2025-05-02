@@ -19,7 +19,7 @@ class ShopperService:
         """Retrieves a shopper by ID"""
         shopper = ShopperRepository.get_item_id(db, Shopper, shopper_id)
         if not shopper:
-            logger.warning("User with id %s was not found")
+            logger.warning("User with id %s was not found", shopper_id)
             raise NotFound(detail="User not found")
 
         return shopper
@@ -30,7 +30,7 @@ class ShopperService:
             db, Shopper, "email", shopper_email
         )
         if not shopper:
-            logger.warning("User with id %s was not found")
+            logger.warning("User with email %s was not found", shopper_email)
             raise NotFound(detail="User not found")
 
         return shopper

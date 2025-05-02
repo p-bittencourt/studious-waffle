@@ -4,5 +4,5 @@ from app.core.repository import BaseRepository
 logger = logging.getLogger(__name__)
 
 
-class ShopperRepository(BaseRepository):
-    """Repository for Shopper database operations"""
+class VendorRepository(BaseRepository):
+    """Repository for Vendor database operations"""
