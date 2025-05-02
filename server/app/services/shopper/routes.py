@@ -16,6 +16,12 @@ def get_shoppers(db: DbSession):
     return shoppers
 
 
+@router.post("/signup")
+def add_shopper(db: DbSession, data: ShopperCreate):
+    """Adds a Shopper user"""
+    return register_shopper(db, data)
+
+
 @router.get("/{shopper_id}", response_model=ShopperPublic)
 def get_shopper_id(db: DbSession, shopper_id: str):
     """Retrieves a shopper by their id"""
@@ -34,9 +40,3 @@ def update_shopper(db: DbSession, shopper_id: str, update_data: ShopperUpdate):
 def delete_shopper(db: DbSession, shopper_id: str):
     """Deletes shopper data"""
     return ShopperService.delete_shopper(db, shopper_id)
-
-
-@router.post("/signup")
-def add_shopper(db: DbSession, data: ShopperCreate):
-    """Adds a Shopper user"""
-    return register_shopper(db, data)

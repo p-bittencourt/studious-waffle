@@ -49,5 +49,4 @@ class ShopperService:
     def delete_shopper(db: Session, shopper_id: str):
         """Deletes a shopper"""
         shopper = ShopperService.get_shopper_id(db, shopper_id)
-
-        return ShopperRepository.delete_shopper(db, shopper)
+        return ShopperRepository.delete_item(db, shopper)

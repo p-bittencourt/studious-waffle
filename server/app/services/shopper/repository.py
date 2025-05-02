@@ -42,9 +42,9 @@ class ShopperRepository(BaseRepository):
 
     #     return shopper
 
-    def delete_shopper(db: Session, shopper: Shopper):
-        """Deletes shopper data"""
-        shopper_id = shopper.id
-        db.delete(shopper)
-        db.commit()
-        logger.info("Deleted shopper #%s", shopper_id)
+    # def delete_shopper(db: Session, shopper: Shopper):
+    #     """Deletes shopper data"""
+    #     shopper_id = shopper.id
+    #     db.delete(shopper)
+    #     db.commit()
+    #     logger.info("Deleted shopper #%s", shopper_id)

@@ -42,3 +42,10 @@ class BaseRepository:
         db.refresh(item)
 
         return item
+
+    def delete_item(db: Session, item: SQLModel):
+        """Deletes an item"""
+        item_id = getattr(item, "id")
+        db.delete(item)
+        db.commit()
+        logger.info("Deleted item #%s", item_id)
