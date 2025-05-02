@@ -5,7 +5,7 @@ from app.core.auth.signup import register_shopper
 from app.core.db.conn import DbSession
 from app.core.db.user import ShopperCreate, ShopperPublic, ShopperUpdate
 
-from . import service
+from .service import ShopperService
 
 router = APIRouter(prefix="/shoppers", tags=["shoppers"])
 
@@ -13,21 +13,21 @@ router = APIRouter(prefix="/shoppers", tags=["shoppers"])
 @router.get("/", response_model=list[ShopperPublic])
 def get_shoppers(db: DbSession):
     """Retrieves all shoppers from the db"""
-    shoppers = service.get_shoppers(db)
+    shoppers = ShopperService.get_shoppers(db)
     return shoppers
 
 
 @router.get("/{shopper_id}", response_model=ShopperPublic)
 def get_shopper_id(db: DbSession, shopper_id: str):
     """Retrieves a shopper by their id"""
-    shopper = service.get_shopper_id(db, shopper_id)
+    shopper = ShopperService.get_shopper_id(db, shopper_id)
     return shopper
 
 
 @router.post("/{shopper_id}", response_model=ShopperPublic)
 def update_shopper(db: DbSession, shopper_id: str, update_data: ShopperUpdate):
     """Updates shopper data"""
-    shopper = service.update_shopper(db, shopper_id, update_data)
+    shopper = ShopperService.update_shopper(db, shopper_id, update_data)
     return shopper
 
 
