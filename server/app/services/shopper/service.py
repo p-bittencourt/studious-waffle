@@ -18,11 +18,19 @@ class ShopperService:
     def get_shopper_id(db: Session, shopper_id: str) -> ShopperPublic:
         """Retrieves a shopper by ID"""
         shopper = ShopperRepository.get_item_id(db, Shopper, shopper_id)
+        if not shopper:
+            logger.warning("User with id %s was not found")
+            raise NotFound(detail="User not found")
+
         return shopper
 
     def get_shopper_email(db: Session, shopper_email: str) -> ShopperPublic:
         """Retrieves a shopper by email"""
         shopper = ShopperRepository.get_shopper_email(db, shopper_email)
+        if not shopper:
+            logger.warning("User with id %s was not found")
+            raise NotFound(detail="User not found")
+
         return shopper
 
     def update_shopper(
@@ -40,8 +48,5 @@ class ShopperService:
     def delete_shopper(db: Session, shopper_id: str):
         """Deletes a shopper"""
         shopper = ShopperRepository.get_shopper_id(db, shopper_id)
-        if not shopper:
-            logger.warning("User with id %s was not found")
-            raise NotFound(detail="User not found")
 
         return ShopperRepository.delete_shopper(db, shopper)
