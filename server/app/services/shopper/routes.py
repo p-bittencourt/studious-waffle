@@ -1,5 +1,4 @@
 from fastapi import APIRouter
-from sqlmodel import select
 
 from app.core.auth.signup import register_shopper
 from app.core.db.conn import DbSession
@@ -29,6 +28,12 @@ def update_shopper(db: DbSession, shopper_id: str, update_data: ShopperUpdate):
     """Updates shopper data"""
     shopper = ShopperService.update_shopper(db, shopper_id, update_data)
     return shopper
+
+
+@router.delete("/{shopper_id}")
+def delete_shopper(db: DbSession, shopper_id: str):
+    """Deletes shopper data"""
+    return ShopperService.delete_shopper(db, shopper_id)
 
 
 @router.post("/signup")

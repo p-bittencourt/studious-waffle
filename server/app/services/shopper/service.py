@@ -37,3 +37,12 @@ class ShopperService:
 
         updated_shopper = ShopperRepository.update_shopper(db, shopper, update_data)
         return updated_shopper
+
+    def delete_shopper(db: Session, shopper_id: str):
+        """Deletes a shopper"""
+        shopper = ShopperRepository.get_shopper_id(db, shopper_id)
+        if not shopper:
+            logger.warning("User with id %s was not found")
+            raise NotFound(detail="User not found")
+
+        return ShopperRepository.delete_shopper(db, shopper)

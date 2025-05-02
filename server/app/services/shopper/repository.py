@@ -3,7 +3,7 @@ from typing import List
 from sqlmodel import Session, select, update
 
 from app.core.db.user import Shopper, ShopperUpdate
-from app.core.utils.exceptions import BadRequest, NotFound
+from app.core.utils.exceptions import BadRequest
 
 logger = logging.getLogger(__name__)
 
@@ -28,10 +28,10 @@ class ShopperRepository:
         return db.scalar(select(Shopper).where(Shopper.email == shopper_name))
 
     def update_shopper(db: Session, shopper: Shopper, data: ShopperUpdate) -> Shopper:
-        """Updates user data"""
+        """Updates shopper data"""
         update_data = {k: v for k, v in data.model_dump().items() if v is not None}
         if not update_data:
-            logger.warning("Couldn't update user %s", shopper.name)
+            logger.warning("Couldn't update shopper %s", shopper.name)
             raise BadRequest(detail="No update data provided")
 
         stmt = update(Shopper).where(Shopper.id == shopper.id).values(update_data)
@@ -40,3 +40,10 @@ class ShopperRepository:
         db.refresh(shopper)
 
         return shopper
+
+    def delete_shopper(db: Session, shopper: Shopper):
+        """Deletes shopper data"""
+        shopper_id = shopper.id
+        db.delete(shopper)
+        db.commit()
+        logger.info("Deleted shopper #%s", shopper_id)
