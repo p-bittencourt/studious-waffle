@@ -1,9 +1,12 @@
+import logging
 from typing import List
 from sqlmodel import Session
 
 from app.core.db.user import ShopperPublic, ShopperUpdate
-
+from app.core.utils.exceptions import NotFound
 from .repository import ShopperRepository
+
+logger = logging.getLogger(__name__)
 
 
 class ShopperService:
@@ -27,5 +30,10 @@ class ShopperService:
         db: Session, shopper_id: str, update_data: ShopperUpdate
     ) -> ShopperPublic:
         """Updates shopper data"""
-        shopper = ShopperRepository.update_shopper(db, shopper_id, update_data)
-        return shopper
+        shopper = ShopperRepository.get_shopper_id(db, shopper_id)
+        if not shopper:
+            logger.warning("User with id %s was not found")
+            raise NotFound(detail="User not found")
+
+        updated_shopper = ShopperRepository.update_shopper(db, shopper, update_data)
+        return updated_shopper

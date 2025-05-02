@@ -27,19 +27,14 @@ class ShopperRepository:
         """Retrieves a shopper by name"""
         return db.scalar(select(Shopper).where(Shopper.email == shopper_name))
 
-    def update_shopper(db: Session, shopper_id: str, data: ShopperUpdate) -> Shopper:
+    def update_shopper(db: Session, shopper: Shopper, data: ShopperUpdate) -> Shopper:
         """Updates user data"""
-        shopper = ShopperRepository.get_shopper_id(db, shopper_id)
-        if not shopper:
-            logger.warning("User with id %s was not found")
-            raise NotFound(detail="User not found")
-
         update_data = {k: v for k, v in data.model_dump().items() if v is not None}
         if not update_data:
             logger.warning("Couldn't update user %s", shopper.name)
             raise BadRequest(detail="No update data provided")
 
-        stmt = update(Shopper).where(Shopper.id == shopper_id).values(update_data)
+        stmt = update(Shopper).where(Shopper.id == shopper.id).values(update_data)
         db.exec(stmt)
         db.commit()
         db.refresh(shopper)
