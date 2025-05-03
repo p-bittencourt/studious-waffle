@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
 from app.core.auth.signup import register_vendor
 from app.core.db.conn import DbSession
@@ -10,11 +10,8 @@ from .service import VendorService
 router = APIRouter(prefix="/vendors", tags=["vendors"])
 
 
-@router.get("/", response_model=list[VendorPublic])
-def get_vendors(db: DbSession):
-    """Retrieves all vendors from the db"""
-    vendors = VendorService.get_vendors(db)
-    return vendors
+def get_vendor_dependency(db: DbSession):
+    return VendorService(db)
 
 
 @router.post("/signup")
@@ -23,21 +20,36 @@ def add_vendor(db: DbSession, data: VendorCreate):
     return register_vendor(db, data)
 
 
+@router.get("/", response_model=list[VendorPublic])
+def get_vendors(service: VendorService = Depends(get_vendor_dependency)):
+    """Retrieves all vendors from the db"""
+    vendors = service.get_vendors()
+    return vendors
+
+
 @router.get("/{vendor_id}", response_model=VendorPublic)
-def get_vendor_id(db: DbSession, vendor_id: str):
+def get_vendor_id(
+    vendor_id: str, service: VendorService = Depends(get_vendor_dependency)
+):
     """Retrieves a vendor by their id"""
-    vendor = VendorService.get_vendor_id(db, vendor_id)
+    vendor = service.get_vendor_id(vendor_id)
     return vendor
 
 
 @router.post("/{vendor_id}", response_model=VendorPublic)
-def update_vendor(db: DbSession, vendor_id: str, update_data: VendorUpdate):
+def update_vendor(
+    vendor_id: str,
+    update_data: VendorUpdate,
+    service: VendorService = Depends(get_vendor_dependency),
+):
     """Updates vendor data"""
-    vendor = VendorService.update_vendor(db, vendor_id, update_data)
+    vendor = service.update_vendor(vendor_id, update_data)
     return vendor
 
 
 @router.delete("/{vendor_id}")
-def delete_vendor(db: DbSession, vendor_id: str):
+def delete_vendor(
+    vendor_id: str, service: VendorService = Depends(get_vendor_dependency)
+):
     """Deletes vendor data"""
-    return VendorService.delete_vendor(db, vendor_id)
+    return service.delete_vendor(vendor_id)

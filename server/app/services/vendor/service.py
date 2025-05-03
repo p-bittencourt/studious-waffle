@@ -10,41 +10,40 @@ logger = logging.getLogger(__name__)
 
 
 class VendorService:
+    def __init__(self, db: Session):
+        self.db = db
+        self.repository = VendorRepository(db)
 
-    def get_vendors(db: Session) -> List[VendorPublic]:
+    def get_vendors(self) -> List[VendorPublic]:
         """Retrieves all vendors from the db"""
-        return VendorRepository.get_items(db, Vendor)
+        return self.repository.get_items(Vendor)
 
-    def get_vendor_id(db: Session, vendor_id: str) -> VendorPublic:
+    def get_vendor_id(self, vendor_id: str) -> VendorPublic:
         """Retrieves a vendor by ID"""
-        vendor = VendorRepository.get_item_id(db, Vendor, vendor_id)
+        vendor = self.repository.get_item_id(Vendor, vendor_id)
         if not vendor:
             logger.warning("User with id %s was not found")
             raise NotFound(detail="User not found")
 
         return vendor
 
-    def get_vendor_email(db: Session, vendor_email: str) -> VendorPublic:
+    def get_vendor_email(self, vendor_email: str) -> VendorPublic:
         """Retrieves a vendor by email"""
-        vendor = VendorRepository.get_item_by_property(
-            db, Vendor, "email", vendor_email
-        )
+        vendor = self.repository.get_item_by_property(Vendor, "email", vendor_email)
         if not vendor:
             logger.warning("User with id %s was not found")
             raise NotFound(detail="User not found")
 
         return vendor
 
-    def update_vendor(
-        db: Session, vendor_id: str, update_data: VendorUpdate
-    ) -> VendorPublic:
+    def update_vendor(self, vendor_id: str, update_data: VendorUpdate) -> VendorPublic:
         """Updates vendor data"""
-        vendor = VendorService.get_vendor_id(db, vendor_id)
+        vendor = self.get_vendor_id(vendor_id)
 
-        updated_vendor = VendorRepository.update_item(db, Vendor, vendor, update_data)
+        updated_vendor = self.repository.update_item(Vendor, vendor, update_data)
         return updated_vendor
 
-    def delete_vendor(db: Session, vendor_id: str):
+    def delete_vendor(self, vendor_id: str):
         """Deletes a vendor"""
-        vendor = VendorService.get_vendor_id(db, vendor_id)
-        return VendorRepository.delete_item(db, vendor)
+        vendor = self.get_vendor_id(vendor_id)
+        return self.repository.delete_item(vendor)
