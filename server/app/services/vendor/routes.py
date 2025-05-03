@@ -1,3 +1,5 @@
+# pylint: disable=unused-argument
+# pylint: disable=unused-import
 """
 Vendor routes module defining API endpoints for vendor operations.
 
@@ -8,15 +10,18 @@ Routes are divided into protected (requiring authentication) and unprotected sec
 
 from fastapi import APIRouter, Depends, status
 
+# Imported for dependency injection - used by FastAPI
 from app.core.auth.current_user import VendorUser
 from app.core.auth.signup import register_vendor
 from app.core.db.conn import DbSession
 from app.core.db.user import VendorCreate, VendorPublic, VendorUpdate
+
+# These exceptions are referenced in docstrings
 from app.core.utils.exceptions import (
     BadRequest,
     NotFound,
     CredentialsException,
-)  # pylint: disable=unused-import
+)
 
 from .service import VendorService
 

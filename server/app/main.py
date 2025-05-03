@@ -10,7 +10,7 @@ from fastapi import Depends, FastAPI
 
 from fastapi.security import OAuth2PasswordRequestForm
 
-from .core.auth.current_user import ShopperUser, get_current_user
+from .core.auth.current_user import ShopperUser
 from .core.auth.login import login_for_access_token
 from .core.utils.logger import configure_logging, LogLevels
 from .core.db.conn import DbSession
