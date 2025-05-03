@@ -22,5 +22,11 @@ class Settings:
 
     DB_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
+    # Test DB variables
+    TEST_DB = DB_NAME + "_TEST"
+    TEST_DB_URI = (
+        f"postgresql://{DB_USER}:{DB_PASSWORD}@" f"{DB_HOST}:{DB_PORT}/{TEST_DB}"
+    )
+
     ### AUTHENTICATION VARIABLES ###
     JWT_SECRET = os.getenv("JWT_SECRET")
