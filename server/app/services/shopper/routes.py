@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
 from app.core.auth.signup import register_shopper
 from app.core.db.conn import DbSession
@@ -9,10 +9,14 @@ from .service import ShopperService
 router = APIRouter(prefix="/shoppers", tags=["shoppers"])
 
 
+def get_shopper_service(db: DbSession):
+    return ShopperService(db)
+
+
 @router.get("/", response_model=list[ShopperPublic])
-def get_shoppers(db: DbSession):
+def get_shoppers(service: ShopperService = Depends(get_shopper_service)):
     """Retrieves all shoppers from the db"""
-    shoppers = ShopperService.get_shoppers(db)
+    shoppers = service.get_shoppers()
     return shoppers
 
 
@@ -23,20 +27,28 @@ def add_shopper(db: DbSession, data: ShopperCreate):
 
 
 @router.get("/{shopper_id}", response_model=ShopperPublic)
-def get_shopper_id(db: DbSession, shopper_id: str):
+def get_shopper_id(
+    shopper_id: str, service: ShopperService = Depends(get_shopper_service)
+):
     """Retrieves a shopper by their id"""
-    shopper = ShopperService.get_shopper_id(db, shopper_id)
+    shopper = service.get_shopper_id(shopper_id)
     return shopper
 
 
 @router.post("/{shopper_id}", response_model=ShopperPublic)
-def update_shopper(db: DbSession, shopper_id: str, update_data: ShopperUpdate):
+def update_shopper(
+    shopper_id: str,
+    update_data: ShopperUpdate,
+    service: ShopperService = Depends(get_shopper_service),
+):
     """Updates shopper data"""
-    shopper = ShopperService.update_shopper(db, shopper_id, update_data)
+    shopper = service.update_shopper(shopper_id, update_data)
     return shopper
 
 
 @router.delete("/{shopper_id}")
-def delete_shopper(db: DbSession, shopper_id: str):
+def delete_shopper(
+    shopper_id: str, service: ShopperService = Depends(get_shopper_service)
+):
     """Deletes shopper data"""
-    return ShopperService.delete_shopper(db, shopper_id)
+    return service.delete_shopper(shopper_id)

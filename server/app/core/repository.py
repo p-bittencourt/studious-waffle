@@ -8,24 +8,26 @@ logger = logging.getLogger(__name__)
 
 
 class BaseRepository:
+    def __init__(self, db: Session):
+        self.db = db
 
-    def get_items(db: Session, model: SQLModel):
+    def get_items(self, model: SQLModel):
         """Retrieves all items from db"""
-        return db.scalars(select(model)).all()
+        return self.db.scalars(select(model)).all()
 
-    def get_item_id(db: Session, model: SQLModel, item_id: str):
+    def get_item_id(self, model: SQLModel, item_id: str):
         """Retrieves an item by id"""
-        return db.scalar(select(model).where(model.id == item_id))
+        return self.db.scalar(select(model).where(model.id == item_id))
 
     def get_item_by_property(
-        db: Session, model: SQLModel, db_property: str, item_property: str
+        self, model: SQLModel, db_property: str, item_property: str
     ):
         """Retrevies an item by property"""
-        return db.scalar(
+        return self.db.scalar(
             select(model).where(getattr(model, db_property) == item_property)
         )
 
-    def update_item(db: Session, model: SQLModel, item: SQLModel, data: any):
+    def update_item(self, model: SQLModel, item: SQLModel, data: any):
         """Updates an item"""
         update_data = {k: v for k, v in data.model_dump().items() if v is not None}
         if not update_data:
@@ -37,15 +39,15 @@ class BaseRepository:
             .where(getattr(model, "id") == getattr(item, "id"))
             .values(update_data)
         )
-        db.exec(stmt)
-        db.commit()
-        db.refresh(item)
+        self.db.exec(stmt)
+        self.db.commit()
+        self.db.refresh(item)
 
         return item
 
-    def delete_item(db: Session, item: SQLModel):
+    def delete_item(self, item: SQLModel):
         """Deletes an item"""
         item_id = getattr(item, "id")
-        db.delete(item)
-        db.commit()
+        self.db.delete(item)
+        self.db.commit()
         logger.info("Deleted item #%s", item_id)

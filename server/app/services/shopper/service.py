@@ -10,25 +10,26 @@ logger = logging.getLogger(__name__)
 
 
 class ShopperService:
+    def __init__(self, db: Session):
+        self.db = db
+        self.repository = ShopperRepository(db)
 
-    def get_shoppers(db: Session) -> List[ShopperPublic]:
+    def get_shoppers(self) -> List[ShopperPublic]:
         """Retrieves all shoppers from the db"""
-        return ShopperRepository.get_items(db, Shopper)
+        return self.repository.get_items(Shopper)
 
-    def get_shopper_id(db: Session, shopper_id: str) -> ShopperPublic:
+    def get_shopper_id(self, shopper_id: str) -> ShopperPublic:
         """Retrieves a shopper by ID"""
-        shopper = ShopperRepository.get_item_id(db, Shopper, shopper_id)
+        shopper = self.repository.get_item_id(Shopper, shopper_id)
         if not shopper:
             logger.warning("User with id %s was not found", shopper_id)
             raise NotFound(detail="User not found")
 
         return shopper
 
-    def get_shopper_email(db: Session, shopper_email: str) -> ShopperPublic:
+    def get_shopper_email(self, shopper_email: str) -> ShopperPublic:
         """Retrieves a shopper by email"""
-        shopper = ShopperRepository.get_item_by_property(
-            db, Shopper, "email", shopper_email
-        )
+        shopper = self.repository.get_item_by_property(Shopper, "email", shopper_email)
         if not shopper:
             logger.warning("User with email %s was not found", shopper_email)
             raise NotFound(detail="User not found")
@@ -36,17 +37,15 @@ class ShopperService:
         return shopper
 
     def update_shopper(
-        db: Session, shopper_id: str, update_data: ShopperUpdate
+        self, shopper_id: str, update_data: ShopperUpdate
     ) -> ShopperPublic:
         """Updates shopper data"""
-        shopper = ShopperService.get_shopper_id(db, shopper_id)
+        shopper = self.get_shopper_id(shopper_id)
 
-        updated_shopper = ShopperRepository.update_item(
-            db, Shopper, shopper, update_data
-        )
+        updated_shopper = self.repository.update_item(Shopper, shopper, update_data)
         return updated_shopper
 
-    def delete_shopper(db: Session, shopper_id: str):
+    def delete_shopper(self, shopper_id: str):
         """Deletes a shopper"""
-        shopper = ShopperService.get_shopper_id(db, shopper_id)
-        return ShopperRepository.delete_item(db, shopper)
+        shopper = self.get_shopper_id(shopper_id)
+        return self.repository.delete_item(shopper)
