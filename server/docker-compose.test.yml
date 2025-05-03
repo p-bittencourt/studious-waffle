@@ -8,6 +8,7 @@ services:
       - PYTHONUNBUFFERED=1
       - TEST_MODE=1
       - DB_HOST=test-db
+      - TEST_DB_URI=postgresql://${DB_USER}:${DB_PASSWORD}@test-db:5432/test_ecommerce
       - TEST_DB=test_ecommerce
     depends_on:
       - test-db
