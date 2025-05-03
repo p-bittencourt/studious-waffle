@@ -9,7 +9,7 @@ from fastapi.security import OAuth2PasswordBearer
 import jwt
 from app.core.db.conn import DbSession
 from app.core.db.user import Shopper, Vendor
-from app.core.utils.exceptions import CredentialsException
+from app.core.utils.exceptions import CredentialsException, ForbiddenException
 from .login import decode_token, get_shopper_by_email, get_vendor_by_email
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
@@ -50,5 +50,41 @@ def get_current_user(db: DbSession, token: str = Depends(oauth2_scheme)):
     raise CredentialsException(detail="User not found")
 
 
-ShopperUser = Annotated[Shopper, Depends(get_current_user)]
-VendorUser = Annotated[Vendor, Depends(get_current_user)]
+def get_current_shopper_user(current_user=Depends(get_current_user)):
+    """
+    Validate that the current user is a Shopper.
+
+    Args:
+        current_user: User object from get_current_user dependecy
+
+    Returns:
+        Shopper: The authenticated shopper user object
+
+    Raises:
+        HTTPException: If user is not a Shopper
+    """
+    if not isinstance(current_user, Shopper):
+        raise ForbiddenException(detail="Access restricted to shoppers only")
+    return current_user
+
+
+def get_current_vendor_user(current_user=Depends(get_current_user)):
+    """
+    Validate that the current user is a Vendor.
+
+    Args:
+        current_user: User object from get_current_user dependecy
+
+    Returns:
+        Vendor: The authenticated shopper user object
+
+    Raises:
+        HTTPException: If user is not a Vendor
+    """
+    if not isinstance(current_user, Vendor):
+        raise ForbiddenException(detail="Access restricted to shoppers only")
+    return current_user
+
+
+ShopperUser = Annotated[Shopper, Depends(get_current_shopper_user)]
+VendorUser = Annotated[Vendor, Depends(get_current_vendor_user)]
