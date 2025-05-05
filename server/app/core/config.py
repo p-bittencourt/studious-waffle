@@ -10,11 +10,11 @@ class Settings:
     load_dotenv()
 
     ### DATABASE RELATED VARIABLES ###
-    DB_USER = os.getenv("DB_USER") | "postgres"
-    DB_PASSWORD = os.getenv("DB_PASSWORD") | "password"
-    DB_HOST = os.getenv("DB_HOST") | "host"
-    DB_PORT = os.getenv("DB_PORT") | 5432
-    DB_NAME = os.getenv("DB_NAME") | "standard"
+    DB_USER = os.getenv("DB_USER") or "postgres"
+    DB_PASSWORD = os.getenv("DB_PASSWORD") or "password"
+    DB_HOST = os.getenv("DB_HOST") or "host"
+    DB_PORT = os.getenv("DB_PORT") or 5432
+    DB_NAME = os.getenv("DB_NAME") or "standard"
 
     DEFAULT_DB_URL = (
         f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/postgres"
