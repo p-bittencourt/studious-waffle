@@ -107,7 +107,7 @@ def get_vendor_id(
     return vendor
 
 
-@router.post("/{vendor_id}", response_model=VendorPublic)
+@router.patch("/{vendor_id}", response_model=VendorPublic)
 def update_vendor(
     current_user: VendorUser,
     vendor_id: str,

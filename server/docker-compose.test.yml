@@ -1,0 +1,26 @@
+services:
+  test:
+    build: .
+    env_file:
+      - .env
+    environment:
+      - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONUNBUFFERED=1
+      - TEST_MODE=1
+      - DB_HOST=test-db
+      - TEST_DB_URI=postgresql://${DB_USER}:${DB_PASSWORD}@test-db:5432/test_ecommerce
+      - TEST_DB=test_ecommerce
+    depends_on:
+      - test-db
+    volumes:
+      - ./:/usr/src/app
+    command: bash ./run_tests.sh -v app/tests/
+
+  test-db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: postgres
+    tmpfs:
+      - /var/lib/postgresql/data

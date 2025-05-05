@@ -106,7 +106,7 @@ def get_shopper_id(
     return shopper
 
 
-@router.post("/{shopper_id}", response_model=ShopperPublic)
+@router.patch("/{shopper_id}", response_model=ShopperPublic)
 def update_shopper(
     current_user: ShopperUser,
     shopper_id: str,
