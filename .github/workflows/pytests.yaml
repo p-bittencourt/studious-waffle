@@ -57,4 +57,4 @@ jobs:
           DB_USER: ${{ secrets.DB_USER || 'postgres' }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD || 'postgres' }}
         run: |
-          docker-compose -f docker-compose.test.yml -p studious_waffle_test down --remove-orphans
+          docker compose -f docker-compose.test.yml -p studious_waffle_test down --remove-orphans
