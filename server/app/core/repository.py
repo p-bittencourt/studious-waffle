@@ -95,11 +95,24 @@ class BaseRepository:
             .where(getattr(model, "id") == getattr(item, "id"))
             .values(update_data)
         )
-        self.db.exec(stmt)
-        self.db.commit()
-        self.db.refresh(item)
+        # Use execute() instead of exec() for better compatibility
+        # Some SQLModel/SQLAlchemy versions use exec() while others use execute()
+        try:
+            # Try the newer exec() method first
+            if hasattr(self.db, "exec"):
+                self.db.exec(stmt)
+            else:
+                # Fall back to execute() if exec() is not available
+                self.db.execute(stmt)
 
-        return item
+            self.db.commit()
+            self.db.refresh(item)
+
+            return item
+
+        except Exception as e:
+            logger.error("Error updating item: %s", str(e))
+            raise
 
     def delete_item(self, item: SQLModel) -> None:
         """Delete an item from the database.
