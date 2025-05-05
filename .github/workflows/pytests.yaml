@@ -12,49 +12,53 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    # Define the db as a service container
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: test_db
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
 
-      - name: Create minimal .env file for tests
-        working-directory: ./server
-        env:
-          DB_USER: ${{ secrets.DB_USER || 'postgres' }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD || 'postgres' }}
-          SECRET_KEY: ${{ secrets.SECRET_KEY || 'secret_key_for_testing_purposes_only' }}
+      - name: Cache pip
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
         run: |
-          cat << EOF > .env
-          DB_USER=${DB_USER}
-          DB_PASSWORD=${DB_PASSWORD}
-          SECRET_KEY=${SECRET_KEY}
-          # Non-sensitive test variables
-          DB_HOST=test-db
-          TEST_DB_URI=postgresql://${DB_USER}:${DB_PASSWORD}@test-db:5432/test_ecommerce
-          TEST_DB=test_ecommerce
-          # Other environment variables needed for tests
-          PYTHONDONTWRITEBYTECODE=1
-          PYTHONUNBUFFERED=1
-          TEST_MODE=1
-          EOF
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-      - name: Run tests using script
-        working-directory: ./server
-        env:
-          # Pass the environment variables to the Docker environment
-          DB_USER: ${{ secrets.DB_USER || 'postgres' }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD || 'postgres' }}
+      - name: Wait for Postgres to be ready
         run: |
-          chmod +x ./run_test_container.sh
-          ./run_test_container.sh
+          until pg_isready -h localhost -p 5432 -U postgres; do
+            echo "Waiting for Postgres..."
+            sleep 1
+          done
 
-      # In case the script fails or doesn't clean up properly
-      - name: Ensure cleanup of test containers
-        if: always()
-        working-directory: ./server
+      - name: Run pytest
         env:
-          DB_USER: ${{ secrets.DB_USER || 'postgres' }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD || 'postgres' }}
-        run: |
-          docker compose -f docker-compose.test.yml -p studious_waffle_test down --remove-orphans
+          TEST_DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_db
+        run: pytest --maxfail=1
