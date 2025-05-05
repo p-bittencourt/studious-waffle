@@ -1,0 +1,60 @@
+name: Run FastAPI Tests
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'server/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Create minimal .env file for tests
+        working-directory: ./server
+        env:
+          DB_USER: ${{ secrets.DB_USER || 'postgres' }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD || 'postgres' }}
+          SECRET_KEY: ${{ secrets.SECRET_KEY || 'secret_key_for_testing_purposes_only' }}
+        run: |
+          cat << EOF > .env
+          DB_USER=${DB_USER}
+          DB_PASSWORD=${DB_PASSWORD}
+          SECRET_KEY=${SECRET_KEY}
+          # Non-sensitive test variables
+          DB_HOST=test-db
+          TEST_DB_URI=postgresql://${DB_USER}:${DB_PASSWORD}@test-db:5432/test_ecommerce
+          TEST_DB=test_ecommerce
+          # Other environment variables needed for tests
+          PYTHONDONTWRITEBYTECODE=1
+          PYTHONUNBUFFERED=1
+          TEST_MODE=1
+          EOF
+
+      - name: Run tests using script
+        working-directory: ./server
+        env:
+          # Pass the environment variables to the Docker environment
+          DB_USER: ${{ secrets.DB_USER || 'postgres' }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD || 'postgres' }}
+        run: |
+          chmod +x ./run_test_container.sh
+          ./run_test_container.sh
+
+      # In case the script fails or doesn't clean up properly
+      - name: Ensure cleanup of test containers
+        if: always()
+        working-directory: ./server
+        env:
+          DB_USER: ${{ secrets.DB_USER || 'postgres' }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD || 'postgres' }}
+        run: |
+          docker-compose -f docker-compose.test.yml -p studious_waffle_test down --remove-orphans
