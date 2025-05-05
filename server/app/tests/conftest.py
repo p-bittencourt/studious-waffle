@@ -1,3 +1,6 @@
+# pylint: disable=redefined-outer-name
+# pylint: disable=protected-access
+# pylint: disable=unused-argument
 """Conftest file to setup test db"""
 
 import logging

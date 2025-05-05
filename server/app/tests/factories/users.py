@@ -1,3 +1,5 @@
+"""Factory for producing test users"""
+
 from datetime import datetime
 import factory
 from app.core.db.user import Shopper, UserStatus, Vendor
