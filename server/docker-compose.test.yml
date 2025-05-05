@@ -14,7 +14,7 @@ services:
       - test-db
     volumes:
       - ./:/usr/src/app
-    command: bash ./run_tests.sh -v app/tests/
+    command: bash ./run_tests.sh -v app/tests
 
   test-db:
     image: postgres:17

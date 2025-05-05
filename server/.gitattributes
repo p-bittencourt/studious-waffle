@@ -1,0 +1,4 @@
+# Declare shell scripts to always use LF line endings (important for Linux compatibility)
+*.sh text eol=lf
+run_tests.sh text eol=lf
+run_test_container.sh text eol=lf
