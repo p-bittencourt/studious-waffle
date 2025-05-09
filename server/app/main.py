@@ -42,15 +42,13 @@ def setup_model_relationships():
     This function must be called after all models are imported/defined
     to ensure the SQLModel relationships are properly set up.
     """
-    # Import here to avoid circular imports during module loading
+    # pylint: disable=import-outside-toplevel,unused-import
+    # These imports are intentionally placed here to prevent circular imports
+    # and are needed to trigger SQLModel's relationship setup
     from app.core.db.user import Vendor
     from app.services.product.model import Product
 
-    # At this point, both Product and Vendor classes are fully defined
-    # SQLModel will now be able to resolve the relationships
-
-    # You don't need to do anything else here, just importing both
-    # models after they're defined is enough
+    # pylint: enable=import-outside-toplevel,unused-import
 
 
 @app.on_event("startup")

@@ -32,6 +32,18 @@ class BaseRepository:
         self.db = db
 
     def add_item(self, model: Type[T], model_data: Any) -> T:
+        """Add a new item to the database.
+
+        Args:
+            model (Type[T]): The SQLModel class to instantiate
+            model_data (Any): An object with model_dump method containing the data
+
+        Returns:
+            T: The newly created model instance
+
+        Raises:
+            Exception: If there is an error creating the item
+        """
         try:
             new_item = model(**model_data.model_dump())
             self.db.add(new_item)
@@ -40,7 +52,7 @@ class BaseRepository:
             logger.info("Created item")
             return new_item
         except Exception as e:
-            logger.error("Failed to add item")
+            logger.error("Failed to add item", str(e))
             raise
 
     def get_items(self, model: Type[T]) -> List[T]:
