@@ -1,3 +1,11 @@
+"""
+Product model module defining the data models for product operations.
+
+This module defines SQLModel classes for product entities, including database
+models, input validation schemas, and response models. It also contains enums
+for product categories and statuses.
+"""
+
 from datetime import datetime
 from enum import StrEnum
 from typing import TYPE_CHECKING, List, Optional
@@ -8,7 +16,11 @@ if TYPE_CHECKING:
 
 
 class ProductCategory(StrEnum):
-    """Product categories enum"""
+    """Product categories enum.
+
+    Defines the available product categories in the system.
+    Used for categorizing and filtering products.
+    """
 
     ELECTRONICS = "ELECTRONICS"
     CLOTHING = "CLOTHING"
@@ -19,7 +31,11 @@ class ProductCategory(StrEnum):
 
 
 class ProductStatus(StrEnum):
-    """Product status enum"""
+    """Product status enum.
+
+    Defines the possible statuses of a product in the system.
+    Used for inventory management and availability filtering.
+    """
 
     ACTIVE = "ACTIVE"
     OUT_OF_STOCK = "OUT_OF_STOCK"
@@ -28,7 +44,11 @@ class ProductStatus(StrEnum):
 
 
 class ProductCreate(SQLModel):
-    """Product Input data"""
+    """Product input data schema.
+
+    Used for validating data when creating a new product.
+    Contains the required fields and their validation rules.
+    """
 
     name: str
     price: float
@@ -41,7 +61,11 @@ class ProductCreate(SQLModel):
 
 
 class Product(ProductCreate, table=True):
-    """Product table"""
+    """Product database model.
+
+    Defines the structure of the product table in the database.
+    Inherits from ProductCreate and adds system-managed fields.
+    """
 
     id: Optional[int] = Field(default=None, primary_key=True)
     vendor_id: Optional[int] = Field(default=None, foreign_key="vendor.id")
@@ -59,6 +83,12 @@ class Product(ProductCreate, table=True):
 
 
 class ProductPublic(SQLModel):
+    """Product response model.
+
+    Defines the structure of product data returned to API clients.
+    Contains all fields that are safe to expose publicly.
+    """
+
     id: Optional[int] = Field(default=None, primary_key=True)
     vendor_id: Optional[int] = Field(default=None, foreign_key="vendor.id")
     name: str
@@ -80,6 +110,12 @@ class ProductPublic(SQLModel):
 
 
 class ProductUpdate(SQLModel):
+    """Product update schema.
+
+    Used for validating data when updating an existing product.
+    All fields are optional to support partial updates.
+    """
+
     name: Optional[str] = None
     price: Optional[float] = None
     description: Optional[str] = None
