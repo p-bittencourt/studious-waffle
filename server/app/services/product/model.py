@@ -1,7 +1,10 @@
 from datetime import datetime
 from enum import StrEnum
-from typing import List, Optional
-from sqlmodel import JSON, Column, Field, SQLModel
+from typing import TYPE_CHECKING, List, Optional
+from sqlmodel import JSON, Column, Field, Relationship, SQLModel
+
+if TYPE_CHECKING:
+    from app.core.db.user import Vendor
 
 
 class ProductCategory(StrEnum):
@@ -49,3 +52,7 @@ class Product(ProductCreateBase, table=True):
     updated_at: Optional[datetime] = None
     views_count: int = 0
     sales_count: int = 0
+    discount_percentage: float = 0
+
+    # Relationships
+    vendor: Optional["Vendor"] = Relationship(back_populates="products")
