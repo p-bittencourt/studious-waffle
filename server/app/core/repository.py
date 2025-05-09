@@ -52,7 +52,7 @@ class BaseRepository:
             logger.info("Created item")
             return new_item
         except Exception as e:
-            logger.error("Failed to add item", str(e))
+            logger.error("Failed to add item %s", str(e))
             raise
 
     def get_items(self, model: Type[T]) -> List[T]:
