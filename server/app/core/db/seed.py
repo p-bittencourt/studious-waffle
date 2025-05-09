@@ -1,11 +1,14 @@
 """Database seeding utilities"""
 
+from datetime import datetime
 import logging
 from enum import Enum
 from typing import List, Dict, Any, Callable
 
 import bcrypt
 from sqlmodel import Session, select
+
+from app.services.product.model import Product, ProductCategory, ProductStatus
 
 from .conn import engine
 from .user import Vendor, Shopper, UserStatus
@@ -132,11 +135,122 @@ def get_minimal_shoppers() -> List[Shopper]:
     ]
 
 
+def get_minimal_products() -> List[Product]:
+    """Retun a minimal list of products for demo vendors"""
+    # Products for Tech Galaxy (vendor_id = 1)
+    tech_galaxy_products = [
+        Product(
+            name="Premium Laptop",
+            price=999.99,
+            description="High-performance laptop with 16GB RAM and 512GB SSD",
+            category=ProductCategory.ELECTRONICS,
+            tags=["laptop", "computer", "premium"],
+            sku="TG-LAPTOP-001",
+            vendor_id=1,  # Tech Galaxy
+            rating=4.8,
+            stock=25,
+            status=ProductStatus.ACTIVE,
+            created_at=datetime.utcnow(),
+            views_count=120,
+            sales_count=17,
+            discount_percentage=0.0,
+        ),
+        Product(
+            name="Wireless Earbuds",
+            price=89.99,
+            description="Noise-cancelling wireless earbuds with 24-hour battery life",
+            category=ProductCategory.ELECTRONICS,
+            tags=["audio", "earbuds", "wireless"],
+            sku="TG-AUDIO-002",
+            vendor_id=1,  # Tech Galaxy
+            rating=4.5,
+            stock=50,
+            status=ProductStatus.ACTIVE,
+            created_at=datetime.utcnow(),
+            views_count=85,
+            sales_count=12,
+            discount_percentage=5.0,
+        ),
+        Product(
+            name="Smart Watch",
+            price=199.99,
+            description="Fitness and health tracking smartwatch with heart rate monitor",
+            category=ProductCategory.ELECTRONICS,
+            tags=["wearable", "fitness", "smartwatch"],
+            sku="TG-WATCH-003",
+            vendor_id=1,  # Tech Galaxy
+            rating=4.6,
+            stock=30,
+            status=ProductStatus.ACTIVE,
+            created_at=datetime.utcnow(),
+            views_count=95,
+            sales_count=8,
+            discount_percentage=0.0,
+        ),
+    ]
+
+    # Products for Fashion Avenue (vendor_id = 2)
+    fashion_avenue_products = [
+        Product(
+            name="Designer Jeans",
+            price=79.99,
+            description="Premium denim jeans with modern fit",
+            category=ProductCategory.CLOTHING,
+            tags=["jeans", "denim", "fashion"],
+            sku="FA-JEAN-001",
+            vendor_id=2,  # Fashion Avenue
+            rating=4.7,
+            stock=40,
+            status=ProductStatus.ACTIVE,
+            created_at=datetime.utcnow(),
+            views_count=110,
+            sales_count=22,
+            discount_percentage=0.0,
+        ),
+        Product(
+            name="Summer Dress",
+            price=59.99,
+            description="Lightweight floral pattern summer dress",
+            category=ProductCategory.CLOTHING,
+            tags=["dress", "summer", "floral"],
+            sku="FA-DRESS-002",
+            vendor_id=2,  # Fashion Avenue
+            rating=4.9,
+            stock=15,
+            status=ProductStatus.ACTIVE,
+            created_at=datetime.utcnow(),
+            views_count=150,
+            sales_count=14,
+            discount_percentage=10.0,
+        ),
+        Product(
+            name="Leather Jacket",
+            price=149.99,
+            description="Classic leather jacket with modern styling",
+            category=ProductCategory.CLOTHING,
+            tags=["jacket", "leather", "outerwear"],
+            sku="FA-JACKET-003",
+            vendor_id=2,  # Fashion Avenue
+            rating=4.8,
+            stock=10,
+            status=ProductStatus.ACTIVE,
+            created_at=datetime.utcnow(),
+            views_count=75,
+            sales_count=6,
+            discount_percentage=0.0,
+        ),
+    ]
+
+    # Combine all products
+    return tech_galaxy_products + fashion_avenue_products
+
+
 # Registry of seed data generators by profile
 SEED_REGISTRY: Dict[SeedProfile, Dict[Any, Callable]] = {
     SeedProfile.MINIMAL: {
         Vendor: get_minimal_vendors,
         Shopper: get_minimal_shoppers,
+        Product: get_minimal_products,
     },
     SeedProfile.TESTING: {
         # To be added
@@ -168,8 +282,16 @@ def seed_database(profile: SeedProfile = SeedProfile.MINIMAL):
     if not seed_generators:
         logger.warning("No seed generators found for profile '%s'", profile)
 
+    # Define seeding order to handle relationships correctly
+    # Entities with no dependencies come before entities with dependencies
+    seeding_order = [Vendor, Shopper, Product]
+
     with Session(engine) as session:
-        for model, generator_function in seed_generators.items():
+        for model in seeding_order:
+            if model not in seed_generators:
+                continue
+
+            generator_function = seed_generators[model]
             model_name = model.__name__
 
             # Check if table is empty and seed if needed

@@ -1,3 +1,7 @@
+[MASTER]
+# Ignore directories/files
+ignore=server/migrations,migrations
+
 [MESSAGES CONTROL]
 # Disable specific messages/warnings
 disable=

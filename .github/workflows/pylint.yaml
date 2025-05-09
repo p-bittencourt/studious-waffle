@@ -25,4 +25,4 @@ jobs:
           pip install -r server/requirements.txt
       - name: Analysing the code with pylint
         run: |
-          pylint --rcfile=server/.pylintrc $(git ls-files 'server/*.py')
+          cd server && pylint --rcfile=.pylintrc app

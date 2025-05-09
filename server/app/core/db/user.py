@@ -1,10 +1,13 @@
 """Define the user SQLModel"""
 
-from typing import List, Optional
+from typing import TYPE_CHECKING, List, Optional
 from enum import StrEnum
 from datetime import datetime
 from pydantic import EmailStr
-from sqlmodel import Field, SQLModel, Column, JSON
+from sqlmodel import Field, Relationship, SQLModel, Column, JSON
+
+if TYPE_CHECKING:
+    from app.services.product.model import Product
 
 ### AUXILIARY STRUCTURES ###
 
@@ -53,7 +56,7 @@ class UserCreateBase(SQLModel):
 
 # System-managed fields
 class UserSystemFields(SQLModel):
-    """Common User data"""
+    """Common User data added by the system"""
 
     password_hash: str = ""
     status: UserStatus = UserStatus.ACTIVE
@@ -79,7 +82,7 @@ class UserBase(UserCreateBase, UserSystemFields):
 
 
 class Vendor(UserBase, table=True):
-    """Vendor table - linked to User table"""
+    """Vendor table"""
 
     id: Optional[int] = Field(default=None, primary_key=True)
     rating: Optional[float] = None
@@ -87,6 +90,9 @@ class Vendor(UserBase, table=True):
     comission: float = 0.0
     specialty: str = ""
     locations: List[Location] = Field(default=[], sa_column=Column(JSON))
+
+    # Relationships
+    products: List["Product"] = Relationship(back_populates="vendor")
 
     def log_format(self) -> str:
         """Format for logging purposes"""
