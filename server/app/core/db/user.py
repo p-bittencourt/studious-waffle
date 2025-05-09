@@ -53,7 +53,7 @@ class UserCreateBase(SQLModel):
 
 # System-managed fields
 class UserSystemFields(SQLModel):
-    """Common User data"""
+    """Common User data added by the system"""
 
     password_hash: str = ""
     status: UserStatus = UserStatus.ACTIVE
@@ -79,7 +79,7 @@ class UserBase(UserCreateBase, UserSystemFields):
 
 
 class Vendor(UserBase, table=True):
-    """Vendor table - linked to User table"""
+    """Vendor table"""
 
     id: Optional[int] = Field(default=None, primary_key=True)
     rating: Optional[float] = None
