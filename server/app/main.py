@@ -20,7 +20,7 @@ from .services.vendor.routes import router as vendor_router
 from .services.product.routes import router as product_router
 
 # from .core.db.conn import create_db_and_tables
-# from .core.db.seed import seed_database
+from .core.db.seed import seed_database
 
 
 logger = logging.getLogger(__name__)
@@ -60,7 +60,7 @@ async def startup_db_client():
     # create_db_and_tables()
 
     # Seed the database with default profile
-    # seed_database()
+    seed_database()
     logger.info("Database initialization complete")
 
 
