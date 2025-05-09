@@ -56,3 +56,24 @@ class Product(ProductCreateBase, table=True):
 
     # Relationships
     vendor: Optional["Vendor"] = Relationship(back_populates="products")
+
+
+class ProductPublic(SQLModel):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    vendor_id: Optional[int] = Field(default=None, foreign_key="vendor.id")
+    name: str
+    price: float
+    description: str
+    category: ProductCategory = ProductCategory.OTHER
+    tags: List[str] = Field(default=[], sa_column=Column(JSON))
+    sku: Optional[str] = Field(
+        default=None, index=True
+    )  # Optional but indexed for fast lookups
+    rating: Optional[float] = None
+    stock: Optional[int] = None
+    status: ProductStatus = ProductStatus.ACTIVE
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: Optional[datetime] = None
+    views_count: int = 0
+    sales_count: int = 0
+    discount_percentage: float = 0
