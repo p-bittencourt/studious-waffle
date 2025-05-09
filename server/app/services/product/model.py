@@ -27,7 +27,7 @@ class ProductStatus(StrEnum):
     PENDING_REVIEW = "PENDING_REVIEW"
 
 
-class ProductCreateBase(SQLModel):
+class ProductCreate(SQLModel):
     """Product Input data"""
 
     name: str
@@ -40,7 +40,7 @@ class ProductCreateBase(SQLModel):
     )  # Optional but indexed for fast lookups
 
 
-class Product(ProductCreateBase, table=True):
+class Product(ProductCreate, table=True):
     """Product table"""
 
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -77,3 +77,18 @@ class ProductPublic(SQLModel):
     views_count: int = 0
     sales_count: int = 0
     discount_percentage: float = 0
+
+
+class ProductUpdate(SQLModel):
+    name: Optional[str] = None
+    price: Optional[float] = None
+    description: Optional[str] = None
+    category: Optional[ProductCategory] = None
+    tags: Optional[List[str]] = None
+    sku: Optional[str] = None
+    rating: Optional[float] = None
+    stock: Optional[int] = None
+    status: Optional[ProductStatus] = None
+    views_count: Optional[int] = None
+    sales_count: Optional[int] = None
+    discount_percentage: Optional[float] = None

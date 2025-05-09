@@ -31,6 +31,18 @@ class BaseRepository:
         """
         self.db = db
 
+    def add_item(self, model: Type[T], model_data: Any) -> T:
+        try:
+            new_item = model(**model_data.model_dump())
+            self.db.add(new_item)
+            self.db.commit()
+            self.db.refresh(new_item)
+            logger.info("Created item")
+            return new_item
+        except Exception as e:
+            logger.error("Failed to add item")
+            raise
+
     def get_items(self, model: Type[T]) -> List[T]:
         """Retrieve all items of the specified model from the database.
 
