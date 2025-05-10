@@ -46,7 +46,9 @@ def setup_model_relationships():
     # These imports are intentionally placed here to prevent circular imports
     # and are needed to trigger SQLModel's relationship setup
     from app.core.db.user import Vendor
+    from app.core.db.user import Shopper
     from app.services.product.model import Product
+    from app.services.order.model import Order
 
     # pylint: enable=import-outside-toplevel,unused-import
 
