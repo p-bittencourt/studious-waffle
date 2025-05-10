@@ -135,7 +135,6 @@ class Order(OrderBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     shopper_id: Optional[int] = Field(default=None, foreign_key="shopper.id")
     status: OrderStatus = OrderStatus.IN_PROGRESS
-    delivery_location: Location = Field(sa_column=Column(JSON))
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: Optional[datetime] = None
     delivered_at: Optional[datetime] = None
@@ -153,8 +152,8 @@ class OrderPublic(SQLModel):
     Contains all fields that are safe to expose publicly.
     """
 
-    shopper_id: str
-    ordered_items: List[OrderItemPublic]
+    shopper_id: int
+    items: List[OrderItemPublic]
     status: OrderStatus = OrderStatus.IN_PROGRESS
 
     # Payment info

@@ -14,6 +14,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 # Import all models
 from app.core.db.user import Shopper, Vendor
 from app.services.product.model import Product
+from app.services.order.model import Order, OrderItem
 
 # Import settings
 from app.core.config import Settings
