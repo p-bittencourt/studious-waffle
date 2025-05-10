@@ -121,13 +121,13 @@ class VendorPublic(SQLModel):
     phone_number: str
     email: EmailStr
     status: UserStatus = UserStatus.ACTIVE
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = None
     last_login: Optional[datetime] = None
     rating: Optional[float] = None
-    bank_info: dict = Field(default={}, sa_column=Column(JSON))
+    bank_info: dict = None
     comission: float = 0.0
     specialty: str = ""
-    locations: List[Location] = Field(default=[], sa_column=Column(JSON))
+    locations: List[Location] = None
 
 
 class VendorUpdate(SQLModel):
@@ -189,16 +189,14 @@ class ShopperPublic(SQLModel):
     phone_number: str
     email: EmailStr
     status: UserStatus = UserStatus.ACTIVE
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = None
     last_login: Optional[datetime] = None
-    preferences: dict = Field(default={}, sa_column=Column(JSON))
-    payment_methods: List[dict] = Field(default=[], sa_column=Column(JSON))
-    wishlist: List[int] = Field(
-        default=[], sa_column=Column(JSON)
-    )  # list of product IDs
-    search_history: List[str] = Field(default=[], sa_column=Column(JSON))
-    order_history: List[int] = Field(default=[], sa_column=Column(JSON))
-    locations: List[Location] = Field(default=[], sa_column=Column(JSON))
+    preferences: dict = None
+    payment_methods: List[dict] = None
+    wishlist: List[int] = None
+    search_history: List[str] = None
+    order_history: List[int] = None
+    locations: List[Location] = None
 
 
 class ShopperUpdate(SQLModel):

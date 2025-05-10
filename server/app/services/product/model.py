@@ -89,20 +89,18 @@ class ProductPublic(SQLModel):
     Contains all fields that are safe to expose publicly.
     """
 
-    id: Optional[int] = Field(default=None, primary_key=True)
-    vendor_id: Optional[int] = Field(default=None, foreign_key="vendor.id")
+    id: Optional[int]
+    vendor_id: Optional[int]
     name: str
     price: float
     description: str
     category: ProductCategory = ProductCategory.OTHER
-    tags: List[str] = Field(default=[], sa_column=Column(JSON))
-    sku: Optional[str] = Field(
-        default=None, index=True
-    )  # Optional but indexed for fast lookups
+    tags: Optional[List[str]] = None
+    sku: Optional[str] = None
     rating: Optional[float] = None
     stock: Optional[int] = None
     status: ProductStatus = ProductStatus.ACTIVE
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime
     updated_at: Optional[datetime] = None
     views_count: int = 0
     sales_count: int = 0
@@ -125,6 +123,7 @@ class ProductUpdate(SQLModel):
     rating: Optional[float] = None
     stock: Optional[int] = None
     status: Optional[ProductStatus] = None
+    updated_at: Optional[datetime] = None
     views_count: Optional[int] = None
     sales_count: Optional[int] = None
     discount_percentage: Optional[float] = None
