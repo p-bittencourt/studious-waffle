@@ -8,6 +8,7 @@ from sqlmodel import Field, Relationship, SQLModel, Column, JSON
 
 if TYPE_CHECKING:
     from app.services.product.model import Product
+    from app.services.order.model import Order
 
 ### AUXILIARY STRUCTURES ###
 
@@ -161,6 +162,9 @@ class Shopper(UserBase, table=True):
     search_history: List[str] = Field(default=[], sa_column=Column(JSON))
     order_history: List[int] = Field(default=[], sa_column=Column(JSON))
     locations: List[Location] = Field(default=[], sa_column=Column(JSON))
+
+    # Relationship
+    orders: List["Order"] = Relationship(back_populates="shopper")
 
     def log_format(self) -> str:
         """Format for logging purposes"""

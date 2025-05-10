@@ -83,7 +83,7 @@ class OrderItem(SQLModel, table=True):
 
     # Relationships
     order: Optional["Order"] = Relationship(back_populates="items")
-    # product: Optional["Product"] = Relationship()
+    product: Optional["Product"] = Relationship()
 
 
 ### ORDER MODELS ###
@@ -142,7 +142,7 @@ class Order(OrderBase, table=True):
 
     # Relationships
     items: List["OrderItem"] = Relationship(back_populates="order")
-    # shopper: Optional["Shopper"] = Relationship(back_populates="orders")
+    shopper: "Shopper" = Relationship(back_populates="orders")
 
 
 class OrderPublic(SQLModel):
