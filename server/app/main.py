@@ -18,6 +18,7 @@ from .core.db.conn import DbSession
 from .services.shopper.routes import router as shopper_router
 from .services.vendor.routes import router as vendor_router
 from .services.product.routes import router as product_router
+from .services.order.routes import router as order_router
 
 # from .core.db.conn import create_db_and_tables
 from .core.db.seed import seed_database
@@ -35,6 +36,7 @@ app = FastAPI(
 app.include_router(shopper_router)
 app.include_router(vendor_router)
 app.include_router(product_router)
+app.include_router(order_router)
 
 
 def setup_model_relationships():
