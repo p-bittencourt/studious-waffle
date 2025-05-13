@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, List, Optional
 
 from sqlmodel import JSON, Column, Field, Relationship, SQLModel
 
-from app.core.db.user import Location
+from app.core.models.common import Location
 from app.services.product.model import Product
 
 if TYPE_CHECKING:
