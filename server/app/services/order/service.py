@@ -108,9 +108,11 @@ class OrderService:
         for item in order_items:
             try:
                 _ = self.product_service.get_product_id(item.product_id)
-            except NotFound:
+            except NotFound as exc:
                 logger.warning("Product with id %s was not found", item.product_id)
-                raise BadRequest(detail=f"Product with id {item.product_id} not found")
+                raise BadRequest(
+                    detail=f"Product with id {item.product_id} not found"
+                ) from exc
 
     def update_order(self, order_id: str, update_data: OrderUpdate) -> OrderPublic:
         """Update an order's information.
