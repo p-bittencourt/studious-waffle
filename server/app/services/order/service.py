@@ -15,6 +15,7 @@ from app.services.order.model import (
     Order,
     OrderCreate,
     OrderItem,
+    OrderItemCreate,
     OrderPublic,
     OrderUpdate,
 )
@@ -53,22 +54,27 @@ class OrderService:
     def register_order(self, shopper_id: str, order_data: OrderCreate) -> OrderPublic:
         # Validate that all products exist
         order_items = order_data.ordered_items
-        for order_item in order_items:
-            try:
-                _ = self.product_service.get_product_id(order_item.product_id)
-            except NotFound:
-                raise BadRequest(
-                    detail=f"Provide a valid product_id to confirm an order. ID #{order_item.product_id} invalid",
-                )
+        valid_items = self.validate_items_exist(order_items)
+        if not valid_items:
+            raise BadRequest(detail=f"Provide a valid product_id to confirm an order.")
 
         order = Order(**order_data.model_dump(), shopper_id=shopper_id)
         result = self.repository.add_item(Order, order)
         order_id = result.id
+
         for order_item in order_items:
             item_object = OrderItem(**order_item.model_dump(), order_id=order_id)
             self.repository.add_item(OrderItem, item_object)
 
         return result
+
+    def validate_items_exist(self, order_items: List[OrderItemCreate]) -> bool:
+        for order_item in order_items:
+            try:
+                _ = self.product_service.get_product_id(order_item.product_id)
+            except NotFound:
+                return False
+        return True
 
     def update_order(self, order_id: str, update_data: OrderUpdate) -> OrderPublic:
         order = self.get_order_id(order_id)
