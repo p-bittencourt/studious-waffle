@@ -62,9 +62,7 @@ class OrderService:
         result = self.repository.add_item(Order, order)
         order_id = result.id
 
-        for order_item in order_items:
-            item_object = OrderItem(**order_item.model_dump(), order_id=order_id)
-            self.repository.add_item(OrderItem, item_object)
+        self.register_order_items(order_items, order_id)
 
         return result
 
@@ -75,6 +73,13 @@ class OrderService:
             except NotFound:
                 return False
         return True
+
+    def register_order_items(
+        self, order_items: List[OrderItemCreate], order_id: str
+    ) -> None:
+        for order_item in order_items:
+            item_object = OrderItem(**order_item.model_dump(), order_id=order_id)
+            self.repository.add_item(OrderItem, item_object)
 
     def update_order(self, order_id: str, update_data: OrderUpdate) -> OrderPublic:
         order = self.get_order_id(order_id)
