@@ -8,6 +8,7 @@ from typing import List, Dict, Any, Callable
 import bcrypt
 from sqlmodel import Session, select
 
+from app.services.order.model import Order, OrderItem, OrderStatus, PaymentStatus
 from app.services.product.model import Product, ProductCategory, ProductStatus
 
 from .conn import engine
@@ -245,12 +246,112 @@ def get_minimal_products() -> List[Product]:
     return tech_galaxy_products + fashion_avenue_products
 
 
+def get_minimal_orders() -> List[Order]:
+    """Return a minimal list of orders for demo data"""
+    now = datetime.utcnow()
+    week_ago = datetime(now.year, now.month, now.day - 7)
+
+    orders = [
+        # Order for John Doe (shopper_id=1)
+        Order(
+            shopper_id=1,
+            status=OrderStatus.CONCLUDED,
+            payment_method="credit_card",
+            payment_status=PaymentStatus.CONFIRMED,
+            delivery_location={
+                "type": "home",
+                "street": "Maple Avenue",
+                "number": "456",
+                "zip_code": "60007",
+                "city": "Chicago",
+                "state": "IL",
+                "country": "USA",
+            },
+            shipping_method="Standard Shipping",
+            tracking_number="TN78901234",
+            estimated_delivery=datetime.utcnow(),
+            subtotal=1089.98,
+            tax_amount=108.99,
+            shipping_cost=15.00,
+            total_value=1213.97,
+            created_at=week_ago,
+            updated_at=week_ago,
+            delivered_at=now,
+            items=[],  # Will be populated after creation
+        ),
+        # Order for Jane Smith (shopper_id=2)
+        Order(
+            shopper_id=2,
+            status=OrderStatus.IN_PROGRESS,
+            payment_method="paypal",
+            payment_status=PaymentStatus.CONFIRMED,
+            delivery_location={
+                "type": "work",
+                "street": "Tech Park",
+                "number": "789",
+                "complement": "Suite 200",
+                "zip_code": "94043",
+                "city": "Mountain View",
+                "state": "CA",
+                "country": "USA",
+            },
+            shipping_method="Express Shipping",
+            tracking_number="TN45678901",
+            estimated_delivery=datetime(now.year, now.month, now.day + 2),
+            discount_code="SUMMER10",
+            discount_amount=6.00,
+            subtotal=59.99,
+            tax_amount=5.99,
+            shipping_cost=8.50,
+            total_value=68.48,
+            created_at=now,
+            updated_at=now,
+            items=[],  # Will be populated after creation
+        ),
+    ]
+
+    # Create order items
+    order_items = [
+        # Items for John's order (Premium Laptop and Wireless Earbuds)
+        OrderItem(
+            order_id=1,
+            product_id=1,  # Premium Laptop
+            quantity=1,
+            unit_price=999.99,
+            total_price=999.99,
+        ),
+        OrderItem(
+            order_id=1,
+            product_id=2,  # Wireless Earbuds
+            quantity=1,
+            unit_price=89.99,
+            total_price=89.99,
+        ),
+        # Item for Jane's order (Summer Dress)
+        OrderItem(
+            order_id=2,
+            product_id=5,  # Summer Dress
+            quantity=1,
+            unit_price=59.99,
+            total_price=59.99,
+        ),
+    ]
+
+    # Associate items with orders
+    # Note: SQLModel will handle the bidirectional relationship
+    orders[0].items = [order_items[0], order_items[1]]
+    orders[1].items = [order_items[2]]
+
+    return orders
+
+
 # Registry of seed data generators by profile
 SEED_REGISTRY: Dict[SeedProfile, Dict[Any, Callable]] = {
     SeedProfile.MINIMAL: {
         Vendor: get_minimal_vendors,
         Shopper: get_minimal_shoppers,
         Product: get_minimal_products,
+        Order: get_minimal_orders,
     },
     SeedProfile.TESTING: {
         # To be added
@@ -284,7 +385,7 @@ def seed_database(profile: SeedProfile = SeedProfile.MINIMAL):
 
     # Define seeding order to handle relationships correctly
     # Entities with no dependencies come before entities with dependencies
-    seeding_order = [Vendor, Shopper, Product]
+    seeding_order = [Vendor, Shopper, Product, Order]
 
     with Session(engine) as session:
         for model in seeding_order:

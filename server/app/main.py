@@ -50,7 +50,7 @@ def setup_model_relationships():
     from app.core.db.user import Vendor
     from app.core.db.user import Shopper
     from app.services.product.model import Product
-    from app.services.order.model import Order
+    from app.services.order.model import Order, OrderItem
 
     # pylint: enable=import-outside-toplevel,unused-import
 
