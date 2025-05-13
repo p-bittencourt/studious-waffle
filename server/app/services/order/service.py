@@ -10,9 +10,16 @@ import logging
 from typing import List
 from sqlmodel import Session
 
-from app.core.utils.exceptions import NotFound
-from app.services.order.model import Order, OrderCreate, OrderPublic, OrderUpdate
+from app.core.utils.exceptions import BadRequest, NotFound
+from app.services.order.model import (
+    Order,
+    OrderCreate,
+    OrderItem,
+    OrderPublic,
+    OrderUpdate,
+)
 from app.services.order.repository import OrderRepository
+from app.services.product.service import ProductService
 
 
 logger = logging.getLogger(__name__)
@@ -30,6 +37,7 @@ class OrderService:
     def __init__(self, db: Session):
         self.db = db
         self.repository = OrderRepository(db)
+        self.product_service = ProductService(db)
 
     def get_orders(self) -> List[OrderPublic]:
         return self.repository.get_items(Order)
@@ -43,13 +51,23 @@ class OrderService:
         return order
 
     def register_order(self, shopper_id: str, order_data: OrderCreate) -> OrderPublic:
+        # Validate that all products exist
         order_items = order_data.ordered_items
-        # TODO: Loop through order items to check total price of order and add it to create item
-        total_value = 10
-        order = Order(
-            **order_data.model_dump(), shopper_id=shopper_id, total_value=total_value
-        )
+        for order_item in order_items:
+            try:
+                _ = self.product_service.get_product_id(order_item.product_id)
+            except NotFound:
+                raise BadRequest(
+                    detail=f"Provide a valid product_id to confirm an order. ID #{order_item.product_id} invalid",
+                )
+
+        order = Order(**order_data.model_dump(), shopper_id=shopper_id)
         result = self.repository.add_item(Order, order)
+        order_id = result.id
+        for order_item in order_items:
+            item_object = OrderItem(**order_item.model_dump(), order_id=order_id)
+            self.repository.add_item(OrderItem, item_object)
+
         return result
 
     def update_order(self, order_id: str, update_data: OrderUpdate) -> OrderPublic:
@@ -60,5 +78,5 @@ class OrderService:
         return updated_order
 
     def delete_order(self, order_id: str) -> None:
-        order = order.get_order_id(order_id)
+        order = self.get_order_id(order_id)
         return self.repository.delete_item(order)

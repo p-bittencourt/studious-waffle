@@ -111,6 +111,7 @@ class OrderBase(SQLModel):
     subtotal: float
     tax_amount: float = 0.0
     shipping_cost: float = 0.0
+    total_value: float
 
 
 ### Order create with a separate property that's not stored on the db, it's for validating items added to the order
@@ -138,7 +139,6 @@ class Order(OrderBase, table=True):
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: Optional[datetime] = None
     delivered_at: Optional[datetime] = None
-    total_value: float
 
     # Relationships
     items: List["OrderItem"] = Relationship(back_populates="order")
