@@ -201,7 +201,7 @@ class ShopperPublic(SQLModel):
     search_history: List[str] = None
     order_history: List[int] = None
     locations: List[Location] = None
-    shopping_cart: ShoppingCart
+    shopping_cart: Optional[ShoppingCart] = None
 
 
 class ShopperUpdate(SQLModel):

@@ -6,11 +6,13 @@ business logic, validation, and orchestrating repository operations. It
 acts as an intermediary between the API endpoints and the repository layer.
 """
 
+from datetime import datetime
 import logging
 from typing import List
 from sqlmodel import Session
 
-from app.core.db.user import Shopper, ShopperPublic, ShopperUpdate
+from app.core.db.user import Shopper, ShopperPublic, ShopperUpdate, ShoppingCart
+from app.core.models.common import OrderItemCreate
 from app.core.utils.exceptions import NotFound
 from .repository import ShopperRepository
 
@@ -116,3 +118,78 @@ class ShopperService:
         """
         shopper = self.get_shopper_id(shopper_id)
         return self.repository.delete_item(shopper)
+
+    ### SHOPPING CART METHODS
+    def add_to_cart(self, shopper_id: str, item_data: OrderItemCreate) -> ShopperPublic:
+        """Add an item to the shopper's shopping cart.
+
+        Args:
+            shopper_id (str): The unique identifier of the shopper
+            item_data (OrderItemCreate): The item to add to the cart
+
+        Returns:
+            ShopperPublic: The updated shopper instance
+
+        Raises:
+            NotFound: If no shopper with the given ID exists
+        """
+        shopper = self.get_shopper_id(shopper_id)
+
+        if not shopper.shopping_cart:
+            shopper.shopping_cart = ShoppingCart(items=[], updated_at=None)
+
+        for i, item in enumerate(shopper.shopping_cart.items):
+            if item.product_id == item_data.product_id:
+                shopper.shopping_cart.items[i].quantity += item_data.quantity
+                break
+        else:
+            shopper.shopping_cart.items.append(item_data)
+
+        shopper.shopping_cart.updated_at = datetime.utcnow()
+        update_data = ShopperUpdate(shopping_cart=shopper.shopping_cart)
+
+        return self.update_shopper(shopper_id, update_data)
+
+    def remove_from_cart(self, shopper_id: str, product_id: str) -> ShopperPublic:
+        """Remove an item from the shopper's shopping cart.
+
+        Args:
+            shopper_id (str): The unique identifier of the shopper
+            product_id (int): The ID of the product to remove
+
+        Returns:
+            ShopperPublic: The updated shopper instance
+
+        Raises:
+            NotFound: If no shopper with the given ID exists or product not in cart
+        """
+        shopper = self.get_shopper_id(shopper_id)
+
+        shopper.shopping_cart.items = [
+            item
+            for item in shopper.shopping_cart.items
+            if item.product_id != product_id
+        ]
+
+        shopper.shopping_cart.updated_at = datetime.utcnow()
+        update_data = ShopperUpdate(shopping_cart=shopper.shopping_cart)
+
+        return self.update_shopper(shopper_id, update_data)
+
+    def clear_shopping_cart(self, shopper_id: str) -> ShopperPublic:
+        """Clear all items from the shopper's shopping cart.
+
+        Args:
+            shopper_id (str): The unique identifier of the shopper
+
+        Returns:
+            ShopperPublic: The updated shopper instance
+
+        Raises:
+            NotFound: If no shopper with the given ID exists
+        """
+        shopper = self.get_shopper_id(shopper_id)
+        shopper.shopping_cart = ShoppingCart(items=[], updated_at=datetime.utcnow())
+        update_data = ShopperUpdate(shopping_cart=shopper.shopping_cart)
+
+        return self.update_shopper(shopper_id, update_data)

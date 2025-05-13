@@ -22,6 +22,7 @@ from app.core.utils.exceptions import (
     NotFound,
     CredentialsException,
 )
+from app.services.order.model import OrderItemCreate
 
 from .service import ShopperService
 
@@ -135,26 +136,108 @@ def update_shopper(
     return shopper
 
 
-@router.delete("/{shopper_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_shopper(
+### THIS SHALL BE AN ADMIN ROUTE LATER ON
+# @router.delete("/{shopper_id}", status_code=status.HTTP_204_NO_CONTENT)
+# def delete_shopper(
+#     current_user: ShopperUser,
+#     shopper_id: str,
+#     service: ShopperService = Depends(get_shopper_service),
+# ):
+#     """Delete a shopper from the system.
+
+#     Requires authentication as a shopper user.
+
+#     Args:
+#         current_user (ShopperUser): Current authenticated shopper
+#         shopper_id (str): Unique identifier of the shopper to delete
+#         service (ShopperService): Shopper service dependency
+
+#     Returns:
+#         None
+
+#     Raises:
+#         NotFound: If shopper with given ID doesn't exist (404)
+#         CredentialsException: If authentication fails (401)
+#     """
+#     return service.delete_shopper(shopper_id)
+
+
+### SHOPPING CART ROUTES
+@router.post("/{shopper_id}/cart/items", response_model=ShopperPublic)
+def add_to_cart(
     current_user: ShopperUser,
     shopper_id: str,
+    item_data: OrderItemCreate,
     service: ShopperService = Depends(get_shopper_service),
 ):
-    """Delete a shopper from the system.
+    """Add an item to the shopper's shopping cart.
 
     Requires authentication as a shopper user.
 
     Args:
         current_user (ShopperUser): Current authenticated shopper
-        shopper_id (str): Unique identifier of the shopper to delete
+        shopper_id (str): Unique identifier of the shopper
+        item_data (OrderItemCreate): The item to add to the cart
         service (ShopperService): Shopper service dependency
 
     Returns:
-        None
+        ShopperPublic: The updated shopper profile with cart
+
+    Raises:
+        NotFound: If shopper with given ID doesn't exist (404)
+        BadRequest: If item data is invalid (400)
+        CredentialsException: If authentication fails (401)
+    """
+    return service.add_to_cart(shopper_id, item_data)
+
+
+@router.delete("/{shopper_id}/cart/items/{product_id}", response_model=ShopperPublic)
+def remove_from_cart(
+    current_user: ShopperUser,
+    shopper_id: str,
+    product_id: str,
+    service: ShopperService = Depends(get_shopper_service),
+):
+    """Remove an item from the shopper's shopping cart.
+
+    Requires authentication as a shopper user.
+
+    Args:
+        current_user (ShopperUser): Current authenticated shopper
+        shopper_id (str): Unique identifier of the shopper
+        product_id (int): ID of the product to remove from cart
+        service (ShopperService): Shopper service dependency
+
+    Returns:
+        ShopperPublic: The updated shopper profile with cart
+
+    Raises:
+        NotFound: If shopper with given ID doesn't exist or product not in cart (404)
+        CredentialsException: If authentication fails (401)
+    """
+    return service.remove_from_cart(shopper_id, product_id)
+
+
+@router.delete("/{shopper_id}/cart", response_model=ShopperPublic)
+def clear_shopping_cart(
+    current_user: ShopperUser,
+    shopper_id: str,
+    service: ShopperService = Depends(get_shopper_service),
+):
+    """Clear the shopper's shopping cart.
+
+    Requires authentication as a shopper user.
+
+    Args:
+        current_user (ShopperUser): Current authenticated shopper
+        shopper_id (str): Unique identifier of the shopper
+        service (ShopperService): Shopper service dependency
+
+    Returns:
+        ShopperPublic: The updated shopper profile with empty cart
 
     Raises:
         NotFound: If shopper with given ID doesn't exist (404)
         CredentialsException: If authentication fails (401)
     """
-    return service.delete_shopper(shopper_id)
+    return service.clear_shopping_cart(shopper_id)

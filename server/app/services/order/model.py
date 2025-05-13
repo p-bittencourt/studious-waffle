@@ -12,8 +12,7 @@ from typing import TYPE_CHECKING, List, Optional
 
 from sqlmodel import JSON, Column, Field, Relationship, SQLModel
 
-from app.core.models.common import Location
-from app.services.product.model import Product
+from app.core.models.common import Location, OrderItem, OrderItemCreate, OrderItemPublic
 
 if TYPE_CHECKING:
     from app.core.db.user import Shopper
@@ -41,49 +40,6 @@ class PaymentStatus(StrEnum):
     PENDING = "PENDING"
     CONFIRMED = "CONFIRMED"
     REJECTED = "REJECTED"
-
-
-### ORDER ITEMS MODELS
-### Order items establish the relationship between an Order and its Products
-
-
-class OrderItemCreate(SQLModel):
-    """Schema for validating order items in API requests"""
-
-    product_id: int
-    quantity: int
-    unit_price: float = None  # Optional in request, calculated in service
-    total_price: float = None  # Optional in request, calculated in service
-
-
-class OrderItemPublic(SQLModel):
-    """Schema for structuring OrderItem data to be returned from the API"""
-
-    product_id: int
-    quantity: int
-    unit_price: float
-    total_price: float
-
-    # Additional info to expose
-    product_name: Optional[str] = None
-
-
-class OrderItem(SQLModel, table=True):
-    """Ordered items class.
-
-    Used for organizing product and amount on an order.
-    """
-
-    id: Optional[int] = Field(default=None, primary_key=True)
-    order_id: int = Field(foreign_key="order.id")
-    product_id: int = Field(foreign_key="product.id")
-    quantity: int
-    unit_price: float  # price at time of order
-    total_price: float
-
-    # Relationships
-    order: Optional["Order"] = Relationship(back_populates="items")
-    product: Optional["Product"] = Relationship()
 
 
 ### ORDER MODELS ###
