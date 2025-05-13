@@ -152,6 +152,7 @@ class OrderPublic(SQLModel):
     Contains all fields that are safe to expose publicly.
     """
 
+    id: int
     shopper_id: int
     items: List[OrderItemPublic]
     status: OrderStatus = OrderStatus.IN_PROGRESS
@@ -187,7 +188,7 @@ class OrderUpdate(SQLModel):
     All fields are optional to support partial updates.
     """
 
-    ordered_items: Optional[List[OrderItem]]
+    items: Optional[List[OrderItem]]
     status: Optional[OrderStatus]
 
     # Payment info
