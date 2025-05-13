@@ -7,7 +7,8 @@ data access methods.
 """
 
 import logging
-from typing import List
+from typing import List, Optional
+from sqlalchemy.exc import SQLAlchemyError
 from app.core.repository import BaseRepository
 from app.services.order.model import Order, OrderItem, OrderItemCreate
 
@@ -27,7 +28,7 @@ class OrderRepository(BaseRepository):
 
     def create_order_with_items(
         self, order: Order, order_items: List[OrderItemCreate]
-    ) -> Order:
+    ) -> Optional[Order]:
         """Create an order and its items in a single transaction.
 
         Args:
@@ -35,10 +36,10 @@ class OrderRepository(BaseRepository):
             order_items: List of order items to associate with the order
 
         Returns:
-            The created order with its ID assigned
+            The created order with its ID assigned, or None if operation fails
 
         Raises:
-            Exception: If any database operation fails
+            SQLAlchemyError: If a specific database operation fails
         """
         try:
             self.db.add(order)
@@ -59,6 +60,7 @@ class OrderRepository(BaseRepository):
             logger.info("Created order #%s with %d items", order.id, len(order_items))
 
             return order
-        except Exception as e:
+        except SQLAlchemyError as e:
             self.db.rollback()
             logger.error("Failed to create order with items: %s", str(e))
+            raise e
