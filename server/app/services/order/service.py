@@ -128,7 +128,7 @@ class OrderService:
             NotFound: If no order with the given ID exists
         """
         order = self.get_order_id(order_id)
-        # TODO: update update_time property
+        # TODO: update update_time property # pylint: disable=W0511
 
         updated_order = self.repository.update_item(Order, order, update_data)
         return updated_order
