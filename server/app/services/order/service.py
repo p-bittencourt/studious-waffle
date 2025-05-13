@@ -14,7 +14,6 @@ from app.core.utils.exceptions import BadRequest, NotFound
 from app.services.order.model import (
     Order,
     OrderCreate,
-    OrderItem,
     OrderItemCreate,
     OrderPublic,
     OrderUpdate,
@@ -54,32 +53,21 @@ class OrderService:
     def register_order(self, shopper_id: str, order_data: OrderCreate) -> OrderPublic:
         # Validate that all products exist
         order_items = order_data.ordered_items
-        valid_items = self.validate_items_exist(order_items)
-        if not valid_items:
-            raise BadRequest(detail=f"Provide a valid product_id to confirm an order.")
+        self._validate_and_prepare_order_items(order_items)
 
         order = Order(**order_data.model_dump(), shopper_id=shopper_id)
-        result = self.repository.add_item(Order, order)
-        order_id = result.id
 
-        self.register_order_items(order_items, order_id)
+        return self.repository.create_order_with_items(order, order_items)
 
-        return result
-
-    def validate_items_exist(self, order_items: List[OrderItemCreate]) -> bool:
-        for order_item in order_items:
-            try:
-                _ = self.product_service.get_product_id(order_item.product_id)
-            except NotFound:
-                return False
-        return True
-
-    def register_order_items(
-        self, order_items: List[OrderItemCreate], order_id: str
+    def _validate_and_prepare_order_items(
+        self, order_items: List[OrderItemCreate]
     ) -> None:
-        for order_item in order_items:
-            item_object = OrderItem(**order_item.model_dump(), order_id=order_id)
-            self.repository.add_item(OrderItem, item_object)
+        for item in order_items:
+            try:
+                _ = self.product_service.get_product_id(item.product_id)
+            except NotFound:
+                logger.warning("Product with id %s was not found", item.product_id)
+                raise BadRequest(detail=f"Product with id {item.product_id} not found")
 
     def update_order(self, order_id: str, update_data: OrderUpdate) -> OrderPublic:
         order = self.get_order_id(order_id)

@@ -151,3 +151,26 @@ class BaseRepository:
         self.db.delete(item)
         self.db.commit()
         logger.info("Deleted item #%s", item_id)
+
+    def add_bulk_items(self, model: Type[T], items: List[SQLModel]) -> List[T]:
+        """Add multiple items to the database in a single operation
+
+        Args:
+            model: The SQLModel class of the items
+            items: List of items to add to the database
+
+        Returns:
+            The list of added items with their IDs assigned
+        """
+
+        try:
+            self.db.add_all(items)
+            self.db.commit()
+            for item in items:
+                self.db.refresh(item)
+            logger.info("Added %d items of type %s", len(items), model.__name__)
+            return items
+        except Exception as e:
+            self.db.rollback()
+            logger.error("Failed to add bulk items: %s", str(e))
+            raise
