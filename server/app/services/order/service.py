@@ -88,11 +88,10 @@ class OrderService:
 
         # Validate that all products exist
         order_items = order_data.ordered_items
-        self._validate_and_prepare_order_items(order_items)
-
+        enriched_items = self._validate_and_prepare_order_items(order_items)
         order = Order(**order_data.model_dump(), shopper_id=shopper_id)
 
-        return self.repository.create_order_with_items(order, order_items)
+        return self.repository.create_order_with_items(order, enriched_items)
 
     def _validate_and_prepare_order_items(
         self, order_items: List[OrderItemCreate]
@@ -105,14 +104,24 @@ class OrderService:
         Raises:
             BadRequest: If a product in the order does not exist
         """
+        enriched_items = []
         for item in order_items:
             try:
-                _ = self.product_service.get_product_id(item.product_id)
+                db_item = self.product_service.get_product_id(item.product_id)
+                unit_price = db_item.price
+                total_price = unit_price * item.quantity
+                enriched_item = {
+                    **item.model_dump(),
+                    "unit_price": unit_price,
+                    "total_price": total_price,
+                }
+                enriched_items.append(enriched_item)
             except NotFound as exc:
                 logger.warning("Product with id %s was not found", item.product_id)
                 raise BadRequest(
                     detail=f"Product with id {item.product_id} not found"
                 ) from exc
+        return enriched_items
 
     def update_order(self, order_id: str, update_data: OrderUpdate) -> OrderPublic:
         """Update an order's information.

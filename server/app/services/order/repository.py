@@ -48,10 +48,10 @@ class OrderRepository(BaseRepository):
             for item_data in order_items:
                 item = OrderItem(
                     order_id=order.id,
-                    product_id=item_data.product_id,
-                    quantity=item_data.quantity,
-                    unit_price=item_data.unit_price,
-                    total_price=item_data.total_price,
+                    product_id=item_data["product_id"],
+                    quantity=item_data["quantity"],
+                    unit_price=item_data["unit_price"],
+                    total_price=item_data["total_price"],
                 )
                 self.db.add(item)
 
@@ -60,7 +60,9 @@ class OrderRepository(BaseRepository):
             logger.info("Created order #%s with %d items", order.id, len(order_items))
 
             return order
-        except SQLAlchemyError as e:
+        except (
+            SQLAlchemyError
+        ) as e:  # We should also handle AttributeError and other kinds of errors
             self.db.rollback()
             logger.error("Failed to create order with items: %s", str(e))
             raise e

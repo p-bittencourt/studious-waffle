@@ -33,8 +33,8 @@ class OrderItemCreate(SQLModel):
 
     product_id: int
     quantity: int
-    unit_price: float = None  # Optional in request, calculated in service
-    total_price: float = None  # Optional in request, calculated in service
+    # unit_price: float = None  # Optional in request, calculated in service
+    # total_price: float = None  # Optional in request, calculated in service
 
 
 class OrderItemPublic(SQLModel):
@@ -46,7 +46,7 @@ class OrderItemPublic(SQLModel):
     total_price: float
 
     # Additional info to expose
-    product_name: Optional[str] = None
+    # product_name: Optional[str] = None
 
 
 class OrderItem(SQLModel, table=True):
