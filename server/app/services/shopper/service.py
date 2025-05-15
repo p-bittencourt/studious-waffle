@@ -167,7 +167,9 @@ class ShopperService:
         # Use the specialized repository method
         return self.update_shopper(shopper_id, update_data)
 
-    def remove_from_cart(self, shopper_id: str, product_id: str) -> ShopperPublic:
+    def remove_from_cart(
+        self, shopper_id: str, product_id: str, quantity: int = 1
+    ) -> ShopperPublic:
         """Remove an item from the shopper's shopping cart.
 
         Args:
@@ -182,13 +184,31 @@ class ShopperService:
         """
         shopper = self.get_shopper_id(shopper_id)
 
-        shopper.shopping_cart.items = [
-            item
-            for item in shopper.shopping_cart.items
-            if item.product_id != product_id
-        ]
+        # if the user doesn't have a shopping cart, create an empty one and return
+        if not shopper.shopping_cart:
+            shopper.shopping_cart = {"items": [], "updated_at": None}
+            update_data = ShopperUpdate(shopping_cart=shopper.shopping_cart)
+            return self.update_shopper(shopper_id, update_data)
 
-        shopper.shopping_cart.updated_at = datetime.utcnow()
+        # Find the item and remove or reduce quantity
+        found = False
+        for i, item in enumerate(shopper.shopping_cart["items"]):
+            if item["product_id"] == int(product_id):
+                found = True
+                if quantity is None or quantity >= item["quantity"]:
+                    # Remove the entire item
+                    shopper.shopping_cart["items"].pop(i)
+                else:
+                    # Reduce quantity
+                    shopper.shopping_cart["items"][i]["quantity"] -= quantity
+                break
+
+            if not found:
+                logger.warning(
+                    f"Product {product_id} not found in shopper {shopper_id}'s cart"
+                )
+
+        shopper.shopping_cart["updated_at"] = datetime.utcnow().isoformat()
         update_data = ShopperUpdate(shopping_cart=shopper.shopping_cart)
 
         return self.update_shopper(shopper_id, update_data)
