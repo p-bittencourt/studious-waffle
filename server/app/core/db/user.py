@@ -219,4 +219,4 @@ class ShopperUpdate(SQLModel):
     search_history: Optional[List[str]] = None
     order_history: Optional[List[int]] = None
     locations: Optional[List[Location]] = None
-    shopping_cart: Optional[ShoppingCart] = None
+    shopping_cart: Optional[dict] = None

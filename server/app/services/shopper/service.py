@@ -137,19 +137,34 @@ class ShopperService:
         """
         shopper = self.get_shopper_id(shopper_id)
 
+        # Validate that the user has a shopping cart
         if not shopper.shopping_cart:
-            shopper.shopping_cart = ShoppingCart(items=[], updated_at=None)
+            shopper.shopping_cart = {"items": [], "updated_at": None}
 
-        for i, item in enumerate(shopper.shopping_cart.items):
-            if item.product_id == item_data.product_id:
-                shopper.shopping_cart.items[i].quantity += item_data.quantity
+        # Validate the product_id exists
+        _ = self.product_service.get_product_id(item_data.product_id)
+
+        # Add or update the item in the cart
+        found = False
+        for i, item in enumerate(shopper.shopping_cart["items"]):
+            if item["product_id"] == item_data.product_id:
+                shopper.shopping_cart["items"][i]["quantity"] += item_data.quantity
+                found = True
                 break
-        else:
-            shopper.shopping_cart.items.append(item_data)
 
-        shopper.shopping_cart.updated_at = datetime.utcnow()
+        if not found:
+            # Add new item as a dictionary
+            shopper.shopping_cart["items"].append(
+                {"product_id": item_data.product_id, "quantity": item_data.quantity}
+            )
+
+        # Update timestamp
+        shopper.shopping_cart["updated_at"] = datetime.utcnow().isoformat()
+
+        # Create update data with just the shopping cart
         update_data = ShopperUpdate(shopping_cart=shopper.shopping_cart)
 
+        # Use the specialized repository method
         return self.update_shopper(shopper_id, update_data)
 
     def remove_from_cart(self, shopper_id: str, product_id: str) -> ShopperPublic:
