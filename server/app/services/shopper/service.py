@@ -226,7 +226,10 @@ class ShopperService:
             NotFound: If no shopper with the given ID exists
         """
         shopper = self.get_shopper_id(shopper_id)
-        shopper.shopping_cart = ShoppingCart(items=[], updated_at=datetime.utcnow())
+        shopper.shopping_cart = {
+            "items": [],
+            "updated_at": datetime.utcnow().isoformat(),
+        }
         update_data = ShopperUpdate(shopping_cart=shopper.shopping_cart)
 
         return self.update_shopper(shopper_id, update_data)
