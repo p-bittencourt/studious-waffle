@@ -10,7 +10,7 @@ import logging
 from typing import List
 from sqlmodel import Session
 
-from app.core.models.common import OrderItemCreate
+from app.core.models.common import OrderItemCreate, OrderItemPublic
 from app.core.utils.exceptions import BadRequest, NotFound
 from app.services.product.model import (
     Product,
@@ -125,7 +125,7 @@ class ProductService:
 
     def validate_and_prepare_order_items(
         self, order_items: List[OrderItemCreate]
-    ) -> None:
+    ) -> List[OrderItemPublic]:
         """Validate that all products in the order exist.
 
         Args:
@@ -136,19 +136,23 @@ class ProductService:
         """
         enriched_items = []
         for item in order_items:
-            try:
-                db_item = self.get_product_id(item.product_id)
-                unit_price = db_item.price
-                total_price = unit_price * item.quantity
-                enriched_item = {
-                    **item.model_dump(),
-                    "unit_price": unit_price,
-                    "total_price": total_price,
-                }
-                enriched_items.append(enriched_item)
-            except NotFound as exc:
-                logger.warning("Product with id %s was not found", item.product_id)
-                raise BadRequest(
-                    detail=f"Product with id {item.product_id} not found"
-                ) from exc
+            enriched_items.append(self.enrich_item(item))
+
         return enriched_items
+
+    def enrich_item(self, item: OrderItemCreate) -> OrderItemPublic:
+        try:
+            db_item = self.get_product_id(item.product_id)
+            unit_price = db_item.price
+            total_price = unit_price * item.quantity
+            enriched_item = {
+                **item.model_dump(),
+                "unit_price": unit_price,
+                "total_price": total_price,
+            }
+            return enriched_item
+        except NotFound as exc:
+            logger.warning("Product with id %s was not found", item.product_id)
+            raise BadRequest(
+                detail=f"Product with id {item.product_id} not found"
+            ) from exc

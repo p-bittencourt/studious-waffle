@@ -14,6 +14,7 @@ from sqlmodel import Session
 from app.core.db.user import Shopper, ShopperPublic, ShopperUpdate, ShoppingCart
 from app.core.models.common import OrderItemCreate
 from app.core.utils.exceptions import NotFound
+from app.services.product.service import ProductService
 from .repository import ShopperRepository
 
 logger = logging.getLogger(__name__)
@@ -36,6 +37,7 @@ class ShopperService:
         """
         self.db = db
         self.repository = ShopperRepository(db)
+        self.product_service = ProductService(db)
 
     def get_shoppers(self) -> List[ShopperPublic]:
         """Retrieve all shoppers from the database.
