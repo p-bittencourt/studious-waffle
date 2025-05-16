@@ -10,11 +10,10 @@ import logging
 from typing import List
 from sqlmodel import Session
 
-from app.core.utils.exceptions import BadRequest, NotFound
+from app.core.utils.exceptions import NotFound
 from app.services.order.model import (
     Order,
     OrderCreate,
-    OrderItemCreate,
     OrderPublic,
     OrderUpdate,
 )
@@ -88,31 +87,12 @@ class OrderService:
 
         # Validate that all products exist
         order_items = order_data.ordered_items
-        self._validate_and_prepare_order_items(order_items)
-
+        enriched_items = self.product_service.validate_and_prepare_order_items(
+            order_items
+        )
         order = Order(**order_data.model_dump(), shopper_id=shopper_id)
 
-        return self.repository.create_order_with_items(order, order_items)
-
-    def _validate_and_prepare_order_items(
-        self, order_items: List[OrderItemCreate]
-    ) -> None:
-        """Validate that all products in the order exist.
-
-        Args:
-            order_items (List[OrderItemCreate]): The list of items in the order
-
-        Raises:
-            BadRequest: If a product in the order does not exist
-        """
-        for item in order_items:
-            try:
-                _ = self.product_service.get_product_id(item.product_id)
-            except NotFound as exc:
-                logger.warning("Product with id %s was not found", item.product_id)
-                raise BadRequest(
-                    detail=f"Product with id {item.product_id} not found"
-                ) from exc
+        return self.repository.create_order_with_items(order, enriched_items)
 
     def update_order(self, order_id: str, update_data: OrderUpdate) -> OrderPublic:
         """Update an order's information.

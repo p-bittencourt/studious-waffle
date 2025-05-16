@@ -10,7 +10,8 @@ import logging
 from typing import List
 from sqlmodel import Session
 
-from app.core.utils.exceptions import NotFound
+from app.core.models.common import OrderItemCreate, OrderItemPublic
+from app.core.utils.exceptions import BadRequest, NotFound
 from app.services.product.model import (
     Product,
     ProductCreate,
@@ -121,3 +122,45 @@ class ProductService:
         """
         product = self.get_product_id(product_id)
         return self.repository.delete_item(product)
+
+    def validate_and_prepare_order_items(
+        self, order_items: List[OrderItemCreate]
+    ) -> List[OrderItemPublic]:
+        """Validate that all products in the order exist.
+
+        Args:
+            order_items (List[OrderItemCreate]): The list of items in the order
+
+        Raises:
+            BadRequest: If a product in the order does not exist
+        """
+        enriched_items = []
+        for item in order_items:
+            enriched_items.append(self.enrich_item(item))
+
+        return enriched_items
+
+    def enrich_item(self, item: OrderItemCreate) -> OrderItemPublic:
+        """Adds unit_price and calculates total_price
+
+        Args:
+            item (OrderItemCreate): The item to be enhanced
+
+        Raises:
+            BadRequest: If a product was not found
+        """
+        try:
+            db_item = self.get_product_id(item.product_id)
+            unit_price = db_item.price
+            total_price = unit_price * item.quantity
+            enriched_item = {
+                **item.model_dump(),
+                "unit_price": unit_price,
+                "total_price": total_price,
+            }
+            return enriched_item
+        except NotFound as exc:
+            logger.warning("Product with id %s was not found", item.product_id)
+            raise BadRequest(
+                detail=f"Product with id {item.product_id} not found"
+            ) from exc

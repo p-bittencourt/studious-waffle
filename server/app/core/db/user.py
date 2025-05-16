@@ -6,6 +6,9 @@ from datetime import datetime
 from pydantic import EmailStr
 from sqlmodel import Field, Relationship, SQLModel, Column, JSON
 
+from app.core.models.common import Location
+from app.services.order.model import OrderItemCreate
+
 if TYPE_CHECKING:
     from app.services.product.model import Product
     from app.services.order.model import Order
@@ -20,21 +23,14 @@ class UserStatus(StrEnum):
     INACTIVE = "INACTIVE"
 
 
-class LocationBase(SQLModel):
-    """Location auxiliary data structure"""
+class ShoppingCartBase(SQLModel):
+    """Shopper user's shopping cart"""
 
-    type: str  # the type could be something like point of sale, warehouse for the vendor | house or office for the shopper, for instance
-    street: str
-    number: str
-    complement: Optional[str] = None
-    zip_code: str
-    city: str
-    state: str
-    country: str
+    items: List[OrderItemCreate]
+    updated_at: Optional[datetime]
 
 
-# For database storage as JSON
-class Location(LocationBase):
+class ShoppingCart(ShoppingCartBase):
     """For db storage as JSON"""
 
     pass
@@ -162,6 +158,10 @@ class Shopper(UserBase, table=True):
     search_history: List[str] = Field(default=[], sa_column=Column(JSON))
     order_history: List[int] = Field(default=[], sa_column=Column(JSON))
     locations: List[Location] = Field(default=[], sa_column=Column(JSON))
+    shopping_cart: ShoppingCart = Field(
+        default_factory=lambda: ShoppingCart(items=[], updated_at=None),
+        sa_column=Column(JSON),
+    )
 
     # Relationship
     orders: List["Order"] = Relationship(back_populates="shopper")
@@ -201,6 +201,7 @@ class ShopperPublic(SQLModel):
     search_history: List[str] = None
     order_history: List[int] = None
     locations: List[Location] = None
+    shopping_cart: Optional[ShoppingCart] = None
 
 
 class ShopperUpdate(SQLModel):
@@ -218,3 +219,4 @@ class ShopperUpdate(SQLModel):
     search_history: Optional[List[str]] = None
     order_history: Optional[List[int]] = None
     locations: Optional[List[Location]] = None
+    shopping_cart: Optional[dict] = None
