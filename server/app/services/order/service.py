@@ -10,11 +10,10 @@ import logging
 from typing import List
 from sqlmodel import Session
 
-from app.core.utils.exceptions import BadRequest, NotFound
+from app.core.utils.exceptions import NotFound
 from app.services.order.model import (
     Order,
     OrderCreate,
-    OrderItemCreate,
     OrderPublic,
     OrderUpdate,
 )

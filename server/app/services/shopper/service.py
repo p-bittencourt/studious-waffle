@@ -11,7 +11,7 @@ import logging
 from typing import List
 from sqlmodel import Session
 
-from app.core.db.user import Shopper, ShopperPublic, ShopperUpdate, ShoppingCart
+from app.core.db.user import Shopper, ShopperPublic, ShopperUpdate
 from app.core.models.common import OrderItemCreate
 from app.core.utils.exceptions import NotFound
 from app.services.product.service import ProductService
@@ -205,7 +205,7 @@ class ShopperService:
 
             if not found:
                 logger.warning(
-                    f"Product {product_id} not found in shopper {shopper_id}'s cart"
+                    "Product %s not found in shopper %s's cart", product_id, shopper_id
                 )
 
         shopper.shopping_cart["updated_at"] = datetime.utcnow().isoformat()

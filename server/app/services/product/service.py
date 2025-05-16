@@ -141,6 +141,14 @@ class ProductService:
         return enriched_items
 
     def enrich_item(self, item: OrderItemCreate) -> OrderItemPublic:
+        """Adds unit_price and calculates total_price
+
+        Args:
+            item (OrderItemCreate): The item to be enhanced
+
+        Raises:
+            BadRequest: If a product was not found
+        """
         try:
             db_item = self.get_product_id(item.product_id)
             unit_price = db_item.price
