@@ -30,6 +30,7 @@ class ShopperFactory(factory.alchemy.SQLAlchemyModelFactory):
     search_history = []
     order_history = []
     locations = []
+    shopping_cart = {"items": [], "updated_at": None}
 
 
 class VendorFactory(factory.alchemy.SQLAlchemyModelFactory):
