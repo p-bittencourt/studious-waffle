@@ -1,11 +1,15 @@
 """Database seeding utilities"""
 
+from datetime import datetime
 import logging
 from enum import Enum
 from typing import List, Dict, Any, Callable
 
 import bcrypt
 from sqlmodel import Session, select
+
+from app.services.order.model import Order, OrderItem, OrderStatus, PaymentStatus
+from app.services.product.model import Product, ProductCategory, ProductStatus
 
 from .conn import engine
 from .user import Vendor, Shopper, UserStatus
@@ -132,11 +136,222 @@ def get_minimal_shoppers() -> List[Shopper]:
     ]
 
 
+def get_minimal_products() -> List[Product]:
+    """Retun a minimal list of products for demo vendors"""
+    # Products for Tech Galaxy (vendor_id = 1)
+    tech_galaxy_products = [
+        Product(
+            name="Premium Laptop",
+            price=999.99,
+            description="High-performance laptop with 16GB RAM and 512GB SSD",
+            category=ProductCategory.ELECTRONICS,
+            tags=["laptop", "computer", "premium"],
+            sku="TG-LAPTOP-001",
+            vendor_id=1,  # Tech Galaxy
+            rating=4.8,
+            stock=25,
+            status=ProductStatus.ACTIVE,
+            created_at=datetime.utcnow(),
+            views_count=120,
+            sales_count=17,
+            discount_percentage=0.0,
+        ),
+        Product(
+            name="Wireless Earbuds",
+            price=89.99,
+            description="Noise-cancelling wireless earbuds with 24-hour battery life",
+            category=ProductCategory.ELECTRONICS,
+            tags=["audio", "earbuds", "wireless"],
+            sku="TG-AUDIO-002",
+            vendor_id=1,  # Tech Galaxy
+            rating=4.5,
+            stock=50,
+            status=ProductStatus.ACTIVE,
+            created_at=datetime.utcnow(),
+            views_count=85,
+            sales_count=12,
+            discount_percentage=5.0,
+        ),
+        Product(
+            name="Smart Watch",
+            price=199.99,
+            description="Fitness and health tracking smartwatch with heart rate monitor",
+            category=ProductCategory.ELECTRONICS,
+            tags=["wearable", "fitness", "smartwatch"],
+            sku="TG-WATCH-003",
+            vendor_id=1,  # Tech Galaxy
+            rating=4.6,
+            stock=30,
+            status=ProductStatus.ACTIVE,
+            created_at=datetime.utcnow(),
+            views_count=95,
+            sales_count=8,
+            discount_percentage=0.0,
+        ),
+    ]
+
+    # Products for Fashion Avenue (vendor_id = 2)
+    fashion_avenue_products = [
+        Product(
+            name="Designer Jeans",
+            price=79.99,
+            description="Premium denim jeans with modern fit",
+            category=ProductCategory.CLOTHING,
+            tags=["jeans", "denim", "fashion"],
+            sku="FA-JEAN-001",
+            vendor_id=2,  # Fashion Avenue
+            rating=4.7,
+            stock=40,
+            status=ProductStatus.ACTIVE,
+            created_at=datetime.utcnow(),
+            views_count=110,
+            sales_count=22,
+            discount_percentage=0.0,
+        ),
+        Product(
+            name="Summer Dress",
+            price=59.99,
+            description="Lightweight floral pattern summer dress",
+            category=ProductCategory.CLOTHING,
+            tags=["dress", "summer", "floral"],
+            sku="FA-DRESS-002",
+            vendor_id=2,  # Fashion Avenue
+            rating=4.9,
+            stock=15,
+            status=ProductStatus.ACTIVE,
+            created_at=datetime.utcnow(),
+            views_count=150,
+            sales_count=14,
+            discount_percentage=10.0,
+        ),
+        Product(
+            name="Leather Jacket",
+            price=149.99,
+            description="Classic leather jacket with modern styling",
+            category=ProductCategory.CLOTHING,
+            tags=["jacket", "leather", "outerwear"],
+            sku="FA-JACKET-003",
+            vendor_id=2,  # Fashion Avenue
+            rating=4.8,
+            stock=10,
+            status=ProductStatus.ACTIVE,
+            created_at=datetime.utcnow(),
+            views_count=75,
+            sales_count=6,
+            discount_percentage=0.0,
+        ),
+    ]
+
+    # Combine all products
+    return tech_galaxy_products + fashion_avenue_products
+
+
+def get_minimal_orders() -> List[Order]:
+    """Return a minimal list of orders for demo data"""
+    now = datetime.utcnow()
+    week_ago = datetime(now.year, now.month, now.day - 7)
+
+    orders = [
+        # Order for John Doe (shopper_id=1)
+        Order(
+            shopper_id=1,
+            status=OrderStatus.CONCLUDED,
+            payment_method="credit_card",
+            payment_status=PaymentStatus.CONFIRMED,
+            delivery_location={
+                "type": "home",
+                "street": "Maple Avenue",
+                "number": "456",
+                "zip_code": "60007",
+                "city": "Chicago",
+                "state": "IL",
+                "country": "USA",
+            },
+            shipping_method="Standard Shipping",
+            tracking_number="TN78901234",
+            estimated_delivery=datetime.utcnow(),
+            subtotal=1089.98,
+            tax_amount=108.99,
+            shipping_cost=15.00,
+            total_value=1213.97,
+            created_at=week_ago,
+            updated_at=week_ago,
+            delivered_at=now,
+            items=[],  # Will be populated after creation
+        ),
+        # Order for Jane Smith (shopper_id=2)
+        Order(
+            shopper_id=2,
+            status=OrderStatus.IN_PROGRESS,
+            payment_method="paypal",
+            payment_status=PaymentStatus.CONFIRMED,
+            delivery_location={
+                "type": "work",
+                "street": "Tech Park",
+                "number": "789",
+                "complement": "Suite 200",
+                "zip_code": "94043",
+                "city": "Mountain View",
+                "state": "CA",
+                "country": "USA",
+            },
+            shipping_method="Express Shipping",
+            tracking_number="TN45678901",
+            estimated_delivery=datetime(now.year, now.month, now.day + 2),
+            discount_code="SUMMER10",
+            discount_amount=6.00,
+            subtotal=59.99,
+            tax_amount=5.99,
+            shipping_cost=8.50,
+            total_value=68.48,
+            created_at=now,
+            updated_at=now,
+            items=[],  # Will be populated after creation
+        ),
+    ]
+
+    # Create order items
+    order_items = [
+        # Items for John's order (Premium Laptop and Wireless Earbuds)
+        OrderItem(
+            order_id=1,
+            product_id=1,  # Premium Laptop
+            quantity=1,
+            unit_price=999.99,
+            total_price=999.99,
+        ),
+        OrderItem(
+            order_id=1,
+            product_id=2,  # Wireless Earbuds
+            quantity=1,
+            unit_price=89.99,
+            total_price=89.99,
+        ),
+        # Item for Jane's order (Summer Dress)
+        OrderItem(
+            order_id=2,
+            product_id=5,  # Summer Dress
+            quantity=1,
+            unit_price=59.99,
+            total_price=59.99,
+        ),
+    ]
+
+    # Associate items with orders
+    # Note: SQLModel will handle the bidirectional relationship
+    orders[0].items = [order_items[0], order_items[1]]
+    orders[1].items = [order_items[2]]
+
+    return orders
+
+
 # Registry of seed data generators by profile
 SEED_REGISTRY: Dict[SeedProfile, Dict[Any, Callable]] = {
     SeedProfile.MINIMAL: {
         Vendor: get_minimal_vendors,
         Shopper: get_minimal_shoppers,
+        Product: get_minimal_products,
+        Order: get_minimal_orders,
     },
     SeedProfile.TESTING: {
         # To be added
@@ -168,8 +383,16 @@ def seed_database(profile: SeedProfile = SeedProfile.MINIMAL):
     if not seed_generators:
         logger.warning("No seed generators found for profile '%s'", profile)
 
+    # Define seeding order to handle relationships correctly
+    # Entities with no dependencies come before entities with dependencies
+    seeding_order = [Vendor, Shopper, Product, Order]
+
     with Session(engine) as session:
-        for model, generator_function in seed_generators.items():
+        for model in seeding_order:
+            if model not in seed_generators:
+                continue
+
+            generator_function = seed_generators[model]
             model_name = model.__name__
 
             # Check if table is empty and seed if needed

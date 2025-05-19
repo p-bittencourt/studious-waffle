@@ -38,3 +38,12 @@ class CredentialsException(HTTPException):
         super().__init__(
             status_code=status.HTTP_401_UNAUTHORIZED, detail=detail, headers=headers
         )
+
+
+class ForbiddenException(HTTPException):
+    """Credentials could not be validated"""
+
+    def __init__(self, detail: str = "Current user not authorized", headers=None):
+        super().__init__(
+            status_code=status.HTTP_403_FORBIDDEN, detail=detail, headers=headers
+        )

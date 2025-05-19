@@ -1,0 +1,7 @@
+# Shopper User
+john_doe@example.com
+johndoe123
+
+# Vendor User
+contact@techgalaxy.com
+techpass123

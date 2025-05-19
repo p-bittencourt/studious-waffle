@@ -1,10 +1,14 @@
 """Define the user SQLModel"""
 
-from typing import List, Optional
+from typing import TYPE_CHECKING, List, Optional
 from enum import StrEnum
 from datetime import datetime
 from pydantic import EmailStr
-from sqlmodel import Field, SQLModel, Column, JSON
+from sqlmodel import Field, Relationship, SQLModel, Column, JSON
+
+if TYPE_CHECKING:
+    from app.services.product.model import Product
+    from app.services.order.model import Order
 
 ### AUXILIARY STRUCTURES ###
 
@@ -53,7 +57,7 @@ class UserCreateBase(SQLModel):
 
 # System-managed fields
 class UserSystemFields(SQLModel):
-    """Common User data"""
+    """Common User data added by the system"""
 
     password_hash: str = ""
     status: UserStatus = UserStatus.ACTIVE
@@ -79,7 +83,7 @@ class UserBase(UserCreateBase, UserSystemFields):
 
 
 class Vendor(UserBase, table=True):
-    """Vendor table - linked to User table"""
+    """Vendor table"""
 
     id: Optional[int] = Field(default=None, primary_key=True)
     rating: Optional[float] = None
@@ -87,6 +91,9 @@ class Vendor(UserBase, table=True):
     comission: float = 0.0
     specialty: str = ""
     locations: List[Location] = Field(default=[], sa_column=Column(JSON))
+
+    # Relationships
+    products: List["Product"] = Relationship(back_populates="vendor")
 
     def log_format(self) -> str:
         """Format for logging purposes"""
@@ -115,13 +122,29 @@ class VendorPublic(SQLModel):
     phone_number: str
     email: EmailStr
     status: UserStatus = UserStatus.ACTIVE
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = None
     last_login: Optional[datetime] = None
     rating: Optional[float] = None
-    bank_info: dict = Field(default={}, sa_column=Column(JSON))
+    bank_info: dict = None
     comission: float = 0.0
     specialty: str = ""
-    locations: List[Location] = Field(default=[], sa_column=Column(JSON))
+    locations: List[Location] = None
+
+
+class VendorUpdate(SQLModel):
+    """DTO for data update"""
+
+    name: Optional[str] = None
+    phone_number: Optional[str] = None
+    email: Optional[EmailStr] = None
+    status: Optional[UserStatus] = None
+    created_at: Optional[datetime] = None
+    last_login: Optional[datetime] = None
+    rating: Optional[float] = None
+    bank_info: Optional[dict] = None
+    comission: Optional[float] = None
+    specialty: Optional[str] = None
+    locations: Optional[List[Location]] = None
 
 
 ### SHOPPER MODELS ###
@@ -139,6 +162,9 @@ class Shopper(UserBase, table=True):
     search_history: List[str] = Field(default=[], sa_column=Column(JSON))
     order_history: List[int] = Field(default=[], sa_column=Column(JSON))
     locations: List[Location] = Field(default=[], sa_column=Column(JSON))
+
+    # Relationship
+    orders: List["Order"] = Relationship(back_populates="shopper")
 
     def log_format(self) -> str:
         """Format for logging purposes"""
@@ -167,13 +193,28 @@ class ShopperPublic(SQLModel):
     phone_number: str
     email: EmailStr
     status: UserStatus = UserStatus.ACTIVE
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = None
     last_login: Optional[datetime] = None
-    preferences: dict = Field(default={}, sa_column=Column(JSON))
-    payment_methods: List[dict] = Field(default=[], sa_column=Column(JSON))
-    wishlist: List[int] = Field(
-        default=[], sa_column=Column(JSON)
-    )  # list of product IDs
-    search_history: List[str] = Field(default=[], sa_column=Column(JSON))
-    order_history: List[int] = Field(default=[], sa_column=Column(JSON))
-    locations: List[Location] = Field(default=[], sa_column=Column(JSON))
+    preferences: dict = None
+    payment_methods: List[dict] = None
+    wishlist: List[int] = None
+    search_history: List[str] = None
+    order_history: List[int] = None
+    locations: List[Location] = None
+
+
+class ShopperUpdate(SQLModel):
+    """DTO for data update"""
+
+    name: Optional[str] = None
+    phone_number: Optional[str] = None
+    email: Optional[EmailStr] = None
+    status: Optional[UserStatus] = None
+    created_at: Optional[datetime] = None
+    last_login: Optional[datetime] = None
+    preferences: Optional[dict] = None
+    payment_methods: Optional[List[dict]] = None
+    wishlist: Optional[List[int]] = None  # list of product IDs
+    search_history: Optional[List[str]] = None
+    order_history: Optional[List[int]] = None
+    locations: Optional[List[Location]] = None
